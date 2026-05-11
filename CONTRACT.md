@@ -49,7 +49,7 @@ For each functionality, map responsibilities to components.
 - Input payload:
   - `{"job_description": str}`
 - Return payload/status:
-  - `{"status": "success", "data": {"job_title": str, "required_skills": [], "preferred_skills": [], "responsibilities": [], "keywords": []}}`
+  - `{"status": "success", "data": {"job_title": str, "required_skills": list[str], "preferred_skills": list[str], "responsibilities": list[str], "keywords": list[str]}}`
 - Failure statuses:
   - `{"status": "incomplete", "message": "Job description is required."}`
   - `{"status": "invalid_input", "message": "Input does not appear to be a job description."}`
@@ -61,7 +61,7 @@ For each functionality, map responsibilities to components.
   - `save_job_analysis(job_analysis: job_analysis_record) -> response_payload`
   - `get_job_analysis(application_id: str) -> response_payload`
 - Input payload:
-  - `{"application_id": int, "job_title": str, "required_skills": [], "keywords": []}`
+  - `{"application_id": int, "job_title": str, "required_skills": list[str], "keywords": list[str]}`
 - Return payload/status:
   - `{"status": "success", "id": int}`
 - Failure statuses:
@@ -75,9 +75,9 @@ For each functionality, map responsibilities to components.
 - Function(s):
   - `generate_application_materials(user_profile: dict, job_analysis: dict) -> response_payload`
 - Input payload:
-  - `{"user_profile": {"education": str, "skills": [], "projects": [], "experience": []}, "job_analysis": {"job_title": str, "required_skills": [], "keywords": []}}`
+  - `{"user_profile": {"education": str, "skills": list[str], "projects": list[str], "experience": list[str]}, "job_analysis": {"job_title": str, "required_skills": list[str], "keywords": list[str]}}`
 - Return payload/status:
-  - `{"status": "success", "data": {"resume_bullets": [], "warnings": []}}`
+  - `{"status": "success", "data": {"resume_bullets": list[str], "warnings": list[str]}}`
 - Failure statuses:
   - `{"status": "incomplete_profile", "message": "User profile is missing required information."}`
   - `{"status": "missing_job_analysis", "message": "Job analysis is required before generating materials."}`
@@ -90,7 +90,7 @@ For each functionality, map responsibilities to components.
   - `save_generated_materials(application_id: str, materials: generated_materials_record) -> response_payload`
   - `get_generated_materials(application_id: str) -> response_payload`
 - Input payload:
-  - `{"application_id": int, "resume_bullets": [], "cover_letter": str}`
+  - `{"application_id": int, "resume_bullets": list[str], "cover_letter": str}`
 - Return payload/status:
   - Success:
     - `{"status": "success", "id": int}`
