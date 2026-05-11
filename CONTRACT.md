@@ -1,50 +1,99 @@
 # CONTRACT.md (Short Teaching Template)
 
 ## Purpose
+
 Use this file to map each functionality to component ownership and explicit interfaces.
 
-## 1) Three Components (3 Layers)
-- `interface`: collects user input, displays output, no application logic
-- `engine`: validates/parses/orchestrates logic, no direct UI rendering
-- `storage`: reads/writes data, enforces uniqueness/integrity
+## Part B: Architecture Mapping
 
-## 2) Mapping Functionality to Components
-For each functionality from `FUNCTIONALITY.md`, define:
-- `interface` responsibility
-- `engine` responsibility
-- `storage` responsibility (if persistence is needed)
+For each functionality, map responsibilities to components.
 
-## 3) Example (Reference)
+### Job Description Analysis Mapping
 
-In this example, `response_payload` means a structured return object (for example: `{"status": "...", "data": ...}`). `member_record` means validated member data (for example: `{"name": "...", "email": "...", "major": "...", "year": "..."}`).
+- `interface` responsibilities:
+  - Collect the pasted job description from the user.
+  - Send the job description to the engine.
+  - Display the extracted job title, skills, responsibilities, and keywords.
+- `engine` responsibilities:
+  - Validate that the job description is not empty.
+  - Send the job description to Gemini API.
+  - Parse Gemini’s response into structured data.
+  - Return success or failure status to the interface.
+- `storage` responsibilities:
+  - Save the analyzed job description if the user chooses to save the application.
+  - Retrieve previous job analysis data when needed.
 
-### Functionality: Chatbot FAQ
-- `interface`: collect user question, display answer/fallback
-- `engine`: interpret question and produce answer
-- `storage`: none, not required for basic FAQ
+### Resume and Cover Letter Generation Mapping
 
-`interface -> engine`
-- `get_faq_response(user_query: str) -> response_payload`
-- Success: `{"status": "success", "data": {"answer": "Club meets every Friday at 5pm."}}`
-- Failure: `{"status": "not_found", "message": "I don't have that information yet."}`
+- `interface` responsibilities:
+  - Show the generated resume bullets and cover letter.
+  - Allow the user to copy or edit the generated content.
+  - Display errors when required information is missing.
+- `engine` responsibilities:
+  - Validate the user profile and job analysis.
+  - Use Gemini API to generate resume bullets and a cover letter.
+  - Ensure the generated content only uses information provided by the user.
+  - Return structured generated content to the interface.
+- `storage` responsibilities:
+  - Save generated resume bullets and cover letter if the user saves the application.
+  - Retrieve saved generated content for a previous application.
 
-### Functionality: Member Registration
-- `interface`: form submission for name/email/major/year, then show result message
-- `engine`: validate required fields + normalize values using local rules (AI optional helper for messy free-text input)
-- `storage`: check duplicate email + save record
+## Part C: Interface Contracts
 
-`interface -> engine`
-- `parse_registration(raw_text: str) -> response_payload`
-- Success: `{"status": "success", "data": {"name": "...", "email": "..."}}`
-- Failure: `{"status": "incomplete", "missing": ["email"]}`
+### Job Description Analysis
 
-`engine -> storage`
-- `save_member(member_data: member_record) -> response_payload`
-- Success: `{"status": "success", "id": "member_123"}`
-- Failure: `{"status": "exists", "message": "duplicate email"}`
+### `interface -> engine`
 
+- Function(s):
+  - `analyze_job_description(job_description: str) -> response_payload`
+- Input payload:
+  - `{"job_description": str}`
+- Return payload/status:
+  - `{"status": "success", "data": {"job_title": str, "required_skills": [], "preferred_skills": [], "responsibilities": [], "keywords": []}}`
+- Failure statuses:
+  - `{"status": "incomplete", "message": "Job description is required."}`
+  - `{"status": "invalid_input", "message": "Input does not appear to be a job description."}`
+  - `{"status": "ai_error", "message": "Could not analyze job description."}`
 
-## 4) Quality Check
-- Each responsibility has one owner only.
-- Every contract defines success + failure statuses.
-- No UI logic in `storage`, no persistence logic in `interface`.
+### `engine -> storage`
+
+- Function(s):
+  - `save_job_analysis(job_analysis: job_analysis_record) -> response_payload`
+  - `get_job_analysis(application_id: str) -> response_payload`
+- Input payload:
+  - `{"application_id": int, "job_title": str, "required_skills": [], "keywords": []}`
+- Return payload/status:
+  - `{"status": "success", "id": int}`
+- Failure statuses:
+  - `{"status": "storage_error", "message": "Could not save job analysis."}`
+  - `{"status": "not_found", "message": "Job analysis record was not found."}`
+
+### Resume and Cover Letter Generation
+
+#### `interface -> engine`
+
+- Function(s):
+  - `generate_application_materials(user_profile: dict, job_analysis: dict) -> response_payload`
+- Input payload:
+  - `{"user_profile": {"education": str, "skills": [], "projects": [], "experience": []}, "job_analysis": {"job_title": str, "required_skills": [], "keywords": []}}`
+- Return payload/status:
+  - `{"status": "success", "data": {"resume_bullets": [], "warnings": []}}`
+- Failure statuses:
+  - `{"status": "incomplete_profile", "message": "User profile is missing required information."}`
+  - `{"status": "missing_job_analysis", "message": "Job analysis is required before generating materials."}`
+  - `{"status": "generation_failed", "message": "Generated content was empty or invalid."}`
+  - `{"status": "ai_error", "message": "Could not generate application materials."}`
+
+#### `engine -> storage`
+
+- Function(s):
+  - `save_generated_materials(application_id: str, materials: generated_materials_record) -> response_payload`
+  - `get_generated_materials(application_id: str) -> response_payload`
+- Input payload:
+  - `{"application_id": int, "resume_bullets": [], "cover_letter": str}`
+- Return payload/status:
+  - Success:
+    - `{"status": "success", "id": int}`
+- Failure statuses:
+  - `{"status": "storage_error", "message": "Could not save generated materials."}`
+  - `{"status": "not_found", "message": "Generated materials were not found."}`

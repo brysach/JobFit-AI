@@ -1,46 +1,32 @@
 # FUNCTIONALITY.md
 
 ## Purpose
+
 Define what the system should do, i.e., functionalities.
 
-## Example (Reference)
-Use this as a template for level of detail.
+### Functionality 1: Job Description Analysis
 
-### Functionality A: Chatbot FAQ Support
 - Input:
-  - Free-text user question (for example: "When are meetings?")
+  - Job description with responsibilities, required skills, preferred skills, and company information.
 - Output:
-  - Natural-language answer shown to the user
+  - Structured summary of the job, including job title, required skills, preferred skills, responsibilities, keywords, and missing information.
 - Success:
-  - Returns an answer relevant to the user question
+  - The system extracts the main job requirements and displays them in organized sections.
 - Failure/Edge Cases:
-  - Unknown question -> return fallback like "I don't have that information yet."
-  - Empty input -> prompt user to enter a question
+  - Empty job description -> return `incomplete` and ask the user to enter a job description.
+  - Gemini API error -> return `ai_error` and ask the user to try again.
+  - Job description does not describe a job -> return `invalid_input`.
 
-### Functionality B: Member Registration
+### Functionality 2: Resume and Cover Letter Generation
+
 - Input:
-  - Free-text or form submission with member fields (for example: name, email, major, year)
+  - User profile with education, skills, projects, work experience, leadership experience, and the analyzed job description.
 - Output:
-  - Submission result message (`success`, `exists`, or `incomplete`)
+  - Tailored resume bullet suggestions and a cover letter draft.
 - Success:
-  - Required fields are present and record is saved to the database
+  - The system generates resume bullets and a cover letter that match the user’s real background with the job requirements.
 - Failure/Edge Cases:
-  - Missing required field(s) -> return `incomplete` with missing field list
-  - Duplicate email -> return `exists`
-  - Invalid formats -> return validation error
-
-
-Your project should define its own functionality set using the same structure.
-
-## Student TODO 1
-1. List your project's top 2-4 core functionalities.
-2. For each functionality, define:
-   - user input
-   - expected output
-   - success condition
-   - failure/edge cases
-
-## Quality Check
-- Each functionality is written from user perspective.
-- Success is measurable (not vague words like "works well").
-- Failure cases are specific enough to become test cases later.
+  - Missing user profile information -> return `incomplete_profile`.
+  - Missing job analysis -> return `missing_job_analysis`.
+  - Gemini API error -> return `ai_error`.
+  - Generated response is empty or badly formatted -> return `generation_failed`.
