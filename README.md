@@ -1,1 +1,1 @@
-# Gemini Resume Builder
+# JobFit AI
