@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from src.engine.engine import analyze_job_description
-from src.storage.storage_handler import save_job_analysis
-
+from src.engine.engine import analyze_and_optionally_save
 
 def _format_list(title: str, items: list[str]) -> list[str]:
     lines = [f"{title}:"]
@@ -52,44 +50,6 @@ def format_analysis_response(response: dict) -> str:
         lines.append(f"Save Status: {response['save_status']}")
 
     return "\n".join(lines)
-
-
-def analyze_and_optionally_save(
-    job_description: str,
-    application_id: int | str | None = None,
-    save: bool = False,
-) -> dict:
-    """Analyze a job description and optionally save the result."""
-
-    response = analyze_job_description(job_description)
-
-    if response.get("status") != "success":
-        return response
-
-    if not save:
-        return response
-
-    if application_id is None or str(application_id).strip() == "":
-        return {
-            "status": "missing_application_id",
-            "message": "Application ID is required to save the job analysis.",
-        }
-
-    data = response["data"]
-
-    job_analysis = {
-        "application_id": application_id,
-        "job_title": data["job_title"],
-        "required_skills": data["required_skills"],
-        "keywords": data["keywords"],
-    }
-
-    save_status = save_job_analysis(job_analysis)
-
-    response["save_status"] = save_status
-
-    return response
-
 
 def main() -> None:
     """Run the command-line interface."""

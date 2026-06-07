@@ -17,10 +17,24 @@ Define what the system should do, i.e., functionalities.
   - Gemini API error -> return `ai_error` and ask the user to try again.
   - Job description does not describe a job -> return `invalid_input`.
 
-### Functionality 2: Resume and Cover Letter Generation
+### Functionality 2: User Profile Management
 
 - Input:
-  - User profile with education, skills, projects, work experience, leadership experience, and the analyzed job description.
+  - User profile information, including name, education, skills, projects, work experience, and leadership experience.
+- Output:
+  - Structured user profile data that can be saved and later used for resume and cover letter generation.
+- Success:
+  - The system validates the required user profile fields and saves the profile for later use.
+- Failure/Edge Cases:
+  - Missing required profile information -> return `incomplete_profile`.
+  - User profile already exists -> return `exists`.
+  - Storage error while saving the profile -> return `storage_error`.
+  - Requested user profile does not exist -> return `not_found`.
+
+### Functionality 3: Resume and Cover Letter Generation
+
+- Input:
+  - User profile with name, education, skills, projects, work experience, leadership experience, and the analyzed job description.
 - Output:
   - Tailored resume bullet suggestions and a cover letter draft.
 - Success:

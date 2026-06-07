@@ -103,3 +103,67 @@ def test_missing_required_gemini_fields_returns_ai_error(monkeypatch):
 
     assert result["status"] == "ai_error"
     assert result["message"] == "Could not analyze job description."
+
+def test_analyze_without_saving(monkeypatch):
+    monkeypatch.setattr(
+        engine,
+        "_call_gemini",
+        lambda prompt: sample_gemini_response(),
+    )
+
+    result = engine.analyze_and_optionally_save(
+        sample_job_description(),
+        save=False,
+    )
+
+    assert result["status"] == "success"
+    assert "save_status" not in result
+
+
+def test_analyze_and_save_success(monkeypatch):
+    saved_record = {}
+
+    def fake_save_job_analysis(job_analysis: dict) -> str:
+        saved_record.update(job_analysis)
+        return "success"
+
+    monkeypatch.setattr(
+        engine,
+        "_call_gemini",
+        lambda prompt: sample_gemini_response(),
+    )
+
+    monkeypatch.setattr(
+        engine,
+        "save_job_analysis",
+        fake_save_job_analysis,
+    )
+
+    result = engine.analyze_and_optionally_save(
+        sample_job_description(),
+        application_id=1,
+        save=True,
+    )
+
+    assert result["status"] == "success"
+    assert result["save_status"] == "success"
+    assert saved_record["application_id"] == 1
+    assert saved_record["job_title"] == "Software Engineering Intern"
+    assert saved_record["required_skills"] == ["Python", "Git"]
+    assert saved_record["keywords"] == ["Python", "Git", "teamwork"]
+
+
+def test_save_without_application_id_returns_error(monkeypatch):
+    monkeypatch.setattr(
+        engine,
+        "_call_gemini",
+        lambda prompt: sample_gemini_response(),
+    )
+
+    result = engine.analyze_and_optionally_save(
+        sample_job_description(),
+        save=True,
+    )
+
+    assert result["status"] == "missing_application_id"
+    assert result["message"] == "Application ID is required to save the job analysis."
