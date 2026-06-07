@@ -51,18 +51,56 @@ def _looks_like_job_description(text: str) -> bool:
 
 
 def _call_gemini(prompt: str) -> str:
-    """Call Gemini API and return the raw response text.
+    """Call Gemini API and return the raw response text."""
 
-    This is intentionally not implemented yet.
-    Tests should mock this function.
-    """
-    raise RuntimeError("Gemini API call is not implemented yet.")
+    import os
+    from google import genai
 
+    api_key = os.getenv("GEMINI_API_KEY")
+
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY environment variable is missing.")
+
+    model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+
+    client = genai.Client(api_key=api_key)
+
+    try:
+        response = client.models.generate_content(
+            model=model_name,
+            contents=prompt,
+        )
+
+        if not response.text:
+            raise RuntimeError("Gemini returned an empty response.")
+
+        return response.text
+    finally:
+        client.close()
+
+def _clean_json_response(response_text: str) -> str:
+    """Remove Markdown code fences from Gemini JSON output."""
+
+    text = response_text.strip()
+
+    if text.startswith("```json"):
+        text = text.removeprefix("```json").strip()
+
+    if text.startswith("```"):
+        text = text.removeprefix("```").strip()
+
+    if text.endswith("```"):
+        text = text.removesuffix("```").strip()
+
+    return text
 
 def _parse_analysis_response(response_text: str) -> dict | None:
     """Parse and validate Gemini's JSON response."""
+
+    cleaned_text = _clean_json_response(response_text)
+
     try:
-        data = json.loads(response_text)
+        data = json.loads(cleaned_text)
     except json.JSONDecodeError:
         return None
 
@@ -108,7 +146,8 @@ def analyze_job_description(job_description: str) -> dict:
 
     try:
         response_text = _call_gemini(prompt)
-    except Exception:
+    except Exception as error:
+        print("DEBUG Gemini call failed:", error)
         return {
             "status": "ai_error",
             "message": "Could not analyze job description.",
