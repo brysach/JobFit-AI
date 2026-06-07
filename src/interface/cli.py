@@ -96,14 +96,14 @@ def main() -> None:
 
     print("Welcome to JobFit-AI")
     print("Paste a job description below.")
-    print("When finished, press Enter on an empty line.")
+    print("When finished, press END on its own line.")
     print()
 
     lines = []
 
     while True:
         line = input()
-        if line == "":
+        if line.strip() == "END":
             break
         lines.append(line)
 
