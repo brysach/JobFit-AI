@@ -1,8 +1,8 @@
 # src/engine/engine.py
 
 from __future__ import annotations
-
 import json
+from src.storage.storage_handler import save_job_analysis
 
 
 REQUIRED_ANALYSIS_KEYS = {
@@ -146,8 +146,7 @@ def analyze_job_description(job_description: str) -> dict:
 
     try:
         response_text = _call_gemini(prompt)
-    except Exception as error:
-        print("DEBUG Gemini call failed:", error)
+    except Exception:
         return {
             "status": "ai_error",
             "message": "Could not analyze job description.",
@@ -165,3 +164,43 @@ def analyze_job_description(job_description: str) -> dict:
         "status": "success",
         "data": data,
     }
+
+def analyze_and_optionally_save(
+    job_description: str,
+    application_id: int | str | None = None,
+    save: bool = False,
+) -> dict:
+    """Analyze a job description and optionally save the result.
+
+    This function keeps the architecture flow as:
+    interface -> engine -> storage
+    """
+
+    response = analyze_job_description(job_description)
+
+    if response.get("status") != "success":
+        return response
+
+    if not save:
+        return response
+
+    if application_id is None or str(application_id).strip() == "":
+        return {
+            "status": "missing_application_id",
+            "message": "Application ID is required to save the job analysis.",
+        }
+
+    data = response["data"]
+
+    job_analysis = {
+        "application_id": application_id,
+        "job_title": data["job_title"],
+        "required_skills": data["required_skills"],
+        "keywords": data["keywords"],
+    }
+
+    save_status = save_job_analysis(job_analysis)
+
+    response["save_status"] = save_status
+
+    return response
