@@ -26,7 +26,7 @@ def save_job_analysis(job_analysis: dict) -> str:
         return "error"
 
     try:
-        ws = get_worksheet()
+        ws = get_worksheet("jobsAnalysis")
 
         existing_ids = ws.col_values(1)
         if str(job_analysis["application_id"]) in existing_ids:

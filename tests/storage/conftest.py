@@ -5,13 +5,12 @@ from __future__ import annotations
 import pytest
 
 import src.storage.job_analysis_storage as job_analysis_storage
+import src.storage.user_profile_storage as user_profile_storage
 
 
 class _InMemoryWorksheet:
-    def __init__(self):
-        self._rows = [
-            ["application_id", "job_title", "required_skills", "keywords"]
-        ]
+    def __init__(self, headers: list[str]):
+        self._rows = [headers]
 
     def col_values(self, col: int) -> list[str]:
         return [str(row[col - 1]) for row in self._rows if len(row) >= col]
@@ -19,12 +18,46 @@ class _InMemoryWorksheet:
     def append_row(self, row: list) -> None:
         self._rows.append(row)
 
+    def get_all_records(self) -> list[dict]:
+        headers = self._rows[0]
+        records = []
+
+        for row in self._rows[1:]:
+            record = {}
+
+            for index, header in enumerate(headers):
+                if index < len(row):
+                    record[header] = row[index]
+                else:
+                    record[header] = ""
+
+            records.append(record)
+
+        return records
+
 
 @pytest.fixture(autouse=True)
-def in_memory_worksheet(monkeypatch):
-    worksheet = _InMemoryWorksheet()
+def in_memory_worksheets(monkeypatch):
+    worksheets = {
+        "jobsAnalysis": _InMemoryWorksheet(
+            ["application_id", "job_title", "required_skills", "keywords"]
+        ),
+        "usersProfile": _InMemoryWorksheet(
+            ["user_id", "name", "education", "skills", "projects", "experience"]
+        ),
+    }
+
+    def fake_get_worksheet(worksheet_name: str):
+        return worksheets[worksheet_name]
+
     monkeypatch.setattr(
         job_analysis_storage,
         "get_worksheet",
-        lambda worksheet_name=None: worksheet,
+        fake_get_worksheet,
+    )
+
+    monkeypatch.setattr(
+        user_profile_storage,
+        "get_worksheet",
+        fake_get_worksheet,
     )
