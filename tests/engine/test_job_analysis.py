@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 
-import src.engine.engine as engine
-from src.engine.engine import analyze_job_description
+import src.engine.job_analysis as job_analysis
+from src.engine.job_analysis import analyze_job_description
 
 
 def sample_job_description() -> str:
@@ -47,8 +47,8 @@ def test_invalid_input_returns_invalid_input():
 
 def test_analyze_job_description_success(monkeypatch):
     monkeypatch.setattr(
-        engine,
-        "_call_gemini",
+        job_analysis,
+        "call_gemini",
         lambda prompt: sample_gemini_response(),
     )
 
@@ -64,18 +64,17 @@ def test_gemini_error_returns_ai_error(monkeypatch):
     def fake_call_gemini(prompt: str) -> str:
         raise RuntimeError("API failed")
 
-    monkeypatch.setattr(engine, "_call_gemini", fake_call_gemini)
+    monkeypatch.setattr(job_analysis, "call_gemini", fake_call_gemini)
 
     result = analyze_job_description(sample_job_description())
 
     assert result["status"] == "ai_error"
     assert result["message"] == "Could not analyze job description."
 
-
 def test_bad_gemini_json_returns_ai_error(monkeypatch):
     monkeypatch.setattr(
-        engine,
-        "_call_gemini",
+        job_analysis,
+        "call_gemini",
         lambda prompt: "This is not JSON",
     )
 
@@ -94,8 +93,8 @@ def test_missing_required_gemini_fields_returns_ai_error(monkeypatch):
     )
 
     monkeypatch.setattr(
-        engine,
-        "_call_gemini",
+        job_analysis,
+        "call_gemini",
         lambda prompt: bad_response,
     )
 
@@ -106,12 +105,12 @@ def test_missing_required_gemini_fields_returns_ai_error(monkeypatch):
 
 def test_analyze_without_saving(monkeypatch):
     monkeypatch.setattr(
-        engine,
-        "_call_gemini",
+        job_analysis,
+        "call_gemini",
         lambda prompt: sample_gemini_response(),
     )
 
-    result = engine.analyze_and_optionally_save(
+    result = job_analysis.analyze_and_optionally_save(
         sample_job_description(),
         save=False,
     )
@@ -128,18 +127,18 @@ def test_analyze_and_save_success(monkeypatch):
         return "success"
 
     monkeypatch.setattr(
-        engine,
-        "_call_gemini",
+        job_analysis,
+        "call_gemini",
         lambda prompt: sample_gemini_response(),
     )
 
     monkeypatch.setattr(
-        engine,
+        job_analysis,
         "save_job_analysis",
         fake_save_job_analysis,
     )
 
-    result = engine.analyze_and_optionally_save(
+    result = job_analysis.analyze_and_optionally_save(
         sample_job_description(),
         application_id=1,
         save=True,
@@ -155,12 +154,12 @@ def test_analyze_and_save_success(monkeypatch):
 
 def test_save_without_application_id_returns_error(monkeypatch):
     monkeypatch.setattr(
-        engine,
-        "_call_gemini",
+        job_analysis,
+        "call_gemini",
         lambda prompt: sample_gemini_response(),
     )
 
-    result = engine.analyze_and_optionally_save(
+    result = job_analysis.analyze_and_optionally_save(
         sample_job_description(),
         save=True,
     )

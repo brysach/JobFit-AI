@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from src.storage.storage_handler import save_job_analysis
+from src.storage.job_analysis_storage import save_job_analysis
 
 
 def valid_job_analysis() -> dict:
