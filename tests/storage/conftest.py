@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import pytest
-import src.storage.storage_handler as handler
+
+import src.storage.job_analysis_storage as job_analysis_storage
 
 
 class _InMemoryWorksheet:
@@ -22,4 +23,8 @@ class _InMemoryWorksheet:
 @pytest.fixture(autouse=True)
 def in_memory_worksheet(monkeypatch):
     worksheet = _InMemoryWorksheet()
-    monkeypatch.setattr(handler, "_get_worksheet", lambda: worksheet)
+    monkeypatch.setattr(
+        job_analysis_storage,
+        "get_worksheet",
+        lambda worksheet_name=None: worksheet,
+    )
