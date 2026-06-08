@@ -6,6 +6,7 @@ import pytest
 
 import src.storage.job_analysis_storage as job_analysis_storage
 import src.storage.user_profile_storage as user_profile_storage
+import src.storage.materials_storage as materials_storage
 
 
 class _InMemoryWorksheet:
@@ -45,6 +46,9 @@ def in_memory_worksheets(monkeypatch):
         "usersProfile": _InMemoryWorksheet(
             ["user_id", "name", "education", "skills", "projects", "experience"]
         ),
+        "generatedMaterials": _InMemoryWorksheet(
+            ["application_id", "user_id", "resume_bullets", "cover_letter"]
+        ),
     }
 
     def fake_get_worksheet(worksheet_name: str):
@@ -58,6 +62,12 @@ def in_memory_worksheets(monkeypatch):
 
     monkeypatch.setattr(
         user_profile_storage,
+        "get_worksheet",
+        fake_get_worksheet,
+    )
+
+    monkeypatch.setattr(
+        materials_storage,
         "get_worksheet",
         fake_get_worksheet,
     )
