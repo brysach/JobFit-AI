@@ -24,8 +24,29 @@ def _format_list(title: str, items: list[str]) -> list[str]:
     return lines
 
 
-def format_user_profiles_response(response: dict) -> str:
-    """Format saved user profiles for display."""
+def _invalid_selection_response() -> dict:
+    return {
+        "status": "invalid_selection",
+        "message": "Please choose a valid entry number.",
+    }
+
+
+def _get_selected_entry(entries: list[dict], selection: str) -> dict | None:
+    """Return the selected entry using the displayed list number."""
+
+    try:
+        selected_index = int(selection)
+    except ValueError:
+        return None
+
+    if selected_index < 1 or selected_index > len(entries):
+        return None
+
+    return entries[selected_index - 1]
+
+
+def format_user_profiles_summary_response(response: dict) -> str:
+    """Format saved user profiles as a short numbered list."""
 
     if response.get("status") != "success":
         return response.get("message", "Could not retrieve user profiles.")
@@ -41,27 +62,15 @@ def format_user_profiles_response(response: dict) -> str:
     ]
 
     for index, profile in enumerate(profiles, start=1):
-        lines.append("")
-        lines.append(f"{index}. {profile.get('name', 'Unknown user')}")
-        lines.append(f"   Education: {profile.get('education', '')}")
-
-        skills_lines = _format_list("   Skills", profile.get("skills", []))
-        lines.extend(skills_lines)
-
-        projects_lines = _format_list("   Projects", profile.get("projects", []))
-        lines.extend(projects_lines)
-
-        experience_lines = _format_list(
-            "   Experience",
-            profile.get("experience", []),
-        )
-        lines.extend(experience_lines)
+        name = profile.get("name", "Unknown user")
+        education = profile.get("education", "")
+        lines.append(f"{index}. {name} | {education}")
 
     return "\n".join(lines)
 
 
-def format_job_analyses_response(response: dict) -> str:
-    """Format saved job analyses for display."""
+def format_job_analyses_summary_response(response: dict) -> str:
+    """Format saved job analyses as a short numbered list."""
 
     if response.get("status") != "success":
         return response.get("message", "Could not retrieve job analyses.")
@@ -77,24 +86,56 @@ def format_job_analyses_response(response: dict) -> str:
     ]
 
     for index, job in enumerate(jobs, start=1):
-        lines.append("")
-        lines.append(f"{index}. {job.get('job_title', 'Unknown job')}")
-        lines.append(f"   Company: {job.get('company_name', 'Unknown')}")
+        company_name = job.get("company_name", "Unknown")
+        job_title = job.get("job_title", "Unknown job")
+        lines.append(f"{index}. {company_name} | {job_title}")
 
-        skills_lines = _format_list(
-            "   Required Skills",
-            job.get("required_skills", []),
-        )
-        lines.extend(skills_lines)
+    return "\n".join(lines)
 
-        keywords_lines = _format_list("   Keywords", job.get("keywords", []))
-        lines.extend(keywords_lines)
+
+def format_user_profile_details(profile: dict) -> str:
+    """Format one complete user profile after it is selected."""
+
+    lines = [
+        "Selected User Profile",
+        "=====================",
+        f"Name: {profile.get('name', 'Unknown user')}",
+        f"Education: {profile.get('education', '')}",
+        "",
+    ]
+
+    lines.extend(_format_list("Skills", profile.get("skills", [])))
+    lines.append("")
+
+    lines.extend(_format_list("Projects", profile.get("projects", [])))
+    lines.append("")
+
+    lines.extend(_format_list("Experience", profile.get("experience", [])))
+
+    return "\n".join(lines)
+
+
+def format_job_analysis_details(job: dict) -> str:
+    """Format one complete job analysis after it is selected."""
+
+    lines = [
+        "Selected Job Analysis",
+        "=====================",
+        f"Company: {job.get('company_name', 'Unknown')}",
+        f"Job Title: {job.get('job_title', 'Unknown job')}",
+        "",
+    ]
+
+    lines.extend(_format_list("Required Skills", job.get("required_skills", [])))
+    lines.append("")
+
+    lines.extend(_format_list("Keywords", job.get("keywords", [])))
 
     return "\n".join(lines)
 
 
 def run_manage_users_flow() -> dict:
-    """Show saved users and let the user delete one by list number."""
+    """Show saved users, show selected details, and delete after confirmation."""
 
     print()
     print_back_instruction()
@@ -102,21 +143,50 @@ def run_manage_users_flow() -> dict:
     response = list_user_profiles()
 
     print()
-    print(format_user_profiles_response(response))
+    print(format_user_profiles_summary_response(response))
 
     if response.get("status") != "success" or not response.get("data"):
         return response
 
+    profiles = response.get("data", [])
+
     print()
-    print("Choose the entry number you want to delete.")
-    selection = input_or_back("Entry number to delete: ")
+    print("Choose the user profile you want to manage.")
+    selection = input_or_back("User entry number: ")
 
     if selection is None:
         cancelled = cancelled_response()
         print(cancelled["message"])
         return cancelled
 
-    delete_response = delete_user_profile_by_index(selection)
+    selected_profile = _get_selected_entry(profiles, selection)
+
+    if selected_profile is None:
+        invalid = _invalid_selection_response()
+        print(invalid["message"])
+        return invalid
+
+    print()
+    print(format_user_profile_details(selected_profile))
+
+    print()
+    confirm_delete = input_or_back("Delete this user profile? (y/n): ")
+
+    if confirm_delete is None:
+        cancelled = cancelled_response()
+        print(cancelled["message"])
+        return cancelled
+
+    if confirm_delete.strip().lower() != "y":
+        response = {
+            "status": "cancelled",
+            "message": "Delete cancelled.",
+        }
+        print(response["message"])
+        return response
+
+    entry_index = profiles.index(selected_profile) + 1
+    delete_response = delete_user_profile_by_index(entry_index)
 
     print(delete_response.get("message", "Something went wrong."))
 
@@ -124,7 +194,7 @@ def run_manage_users_flow() -> dict:
 
 
 def run_manage_jobs_flow() -> dict:
-    """Show saved jobs and let the user delete one by list number."""
+    """Show saved jobs, show selected details, and delete after confirmation."""
 
     print()
     print_back_instruction()
@@ -132,21 +202,50 @@ def run_manage_jobs_flow() -> dict:
     response = list_job_analyses()
 
     print()
-    print(format_job_analyses_response(response))
+    print(format_job_analyses_summary_response(response))
 
     if response.get("status") != "success" or not response.get("data"):
         return response
 
+    jobs = response.get("data", [])
+
     print()
-    print("Choose the entry number you want to delete.")
-    selection = input_or_back("Entry number to delete: ")
+    print("Choose the job analysis you want to manage.")
+    selection = input_or_back("Job entry number: ")
 
     if selection is None:
         cancelled = cancelled_response()
         print(cancelled["message"])
         return cancelled
 
-    delete_response = delete_job_analysis_by_index(selection)
+    selected_job = _get_selected_entry(jobs, selection)
+
+    if selected_job is None:
+        invalid = _invalid_selection_response()
+        print(invalid["message"])
+        return invalid
+
+    print()
+    print(format_job_analysis_details(selected_job))
+
+    print()
+    confirm_delete = input_or_back("Delete this job analysis? (y/n): ")
+
+    if confirm_delete is None:
+        cancelled = cancelled_response()
+        print(cancelled["message"])
+        return cancelled
+
+    if confirm_delete.strip().lower() != "y":
+        response = {
+            "status": "cancelled",
+            "message": "Delete cancelled.",
+        }
+        print(response["message"])
+        return response
+
+    entry_index = jobs.index(selected_job) + 1
+    delete_response = delete_job_analysis_by_index(entry_index)
 
     print(delete_response.get("message", "Something went wrong."))
 

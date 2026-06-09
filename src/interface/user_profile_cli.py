@@ -121,6 +121,7 @@ def run_user_profile_flow() -> dict:
         "experience": experience,
     }
 
+    print()
     save_choice = input_or_back("Save this user profile? (y/n): ")
 
     if save_choice is None:

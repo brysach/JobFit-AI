@@ -100,6 +100,7 @@ def run_job_analysis_flow() -> dict:
             print(response["message"])
             return response
 
+        print()
         generate_choice = input_or_back("Generate job analysis? (y/n): ")
 
         if generate_choice is None:
@@ -119,6 +120,7 @@ def run_job_analysis_flow() -> dict:
         if response.get("status") != "success":
             return response
 
+        print()
         save_choice = input_or_back("Save this job analysis? (y/n): ")
 
         if save_choice is None:
