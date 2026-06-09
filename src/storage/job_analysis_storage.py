@@ -59,12 +59,7 @@ def _get_next_application_id(ws) -> int:
 
 
 def save_job_analysis(job_analysis: dict) -> dict:
-    """Save analyzed job description data.
-
-    Return:
-    - {"status": "success", "application_id": int}
-    - {"status": "error"}
-    """
+    """Save analyzed job description data."""
 
     if not all(key in job_analysis for key in REQUIRED_JOB_ANALYSIS_KEYS):
         return {"status": "error"}
@@ -123,3 +118,50 @@ def get_job_analysis(application_id: int | str) -> dict:
             "status": "not_found",
             "message": "Job analysis record was not found.",
         }
+
+
+def list_job_analyses() -> dict:
+    """Return all saved job analyses with their sheet row numbers."""
+
+    try:
+        ws = get_worksheet("jobsAnalysis")
+        records = ws.get_all_records()
+        job_analyses = []
+
+        for index, record in enumerate(records, start=2):
+            job_analyses.append(
+                {
+                    "row_number": index,
+                    "application_id": record.get("application_id"),
+                    "job_title": record.get("job_title", ""),
+                    "required_skills": _comma_string_to_list(
+                        record.get("required_skills", "")
+                    ),
+                    "keywords": _comma_string_to_list(record.get("keywords", "")),
+                }
+            )
+
+        return {
+            "status": "success",
+            "data": job_analyses,
+        }
+    except Exception:
+        return {
+            "status": "error",
+            "message": "Could not retrieve job analyses.",
+        }
+
+
+def delete_job_analysis_by_row(row_number: int) -> dict:
+    """Delete a job analysis by its Google Sheets row number."""
+
+    try:
+        if row_number <= 1:
+            return {"status": "error"}
+
+        ws = get_worksheet("jobsAnalysis")
+        ws.delete_rows(row_number)
+
+        return {"status": "success"}
+    except Exception:
+        return {"status": "error"}

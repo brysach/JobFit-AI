@@ -69,12 +69,7 @@ def _get_next_user_id(ws) -> int:
 
 
 def save_user_profile(user_profile: dict) -> dict:
-    """Save user profile data.
-
-    Return:
-    - {"status": "success", "user_id": int}
-    - {"status": "error"}
-    """
+    """Save user profile data."""
 
     if not all(key in user_profile for key in REQUIRED_USER_PROFILE_KEYS):
         return {"status": "error"}
@@ -133,3 +128,50 @@ def get_user_profile(user_id: int | str) -> dict:
             "status": "not_found",
             "message": "User profile was not found.",
         }
+
+
+def list_user_profiles() -> dict:
+    """Return all saved user profiles with their sheet row numbers."""
+
+    try:
+        ws = get_worksheet("usersProfile")
+        records = ws.get_all_records()
+        user_profiles = []
+
+        for index, record in enumerate(records, start=2):
+            user_profiles.append(
+                {
+                    "row_number": index,
+                    "user_id": record.get("user_id"),
+                    "name": record.get("name", ""),
+                    "education": record.get("education", ""),
+                    "skills": _json_to_list(record.get("skills", "")),
+                    "projects": _json_to_list(record.get("projects", "")),
+                    "experience": _json_to_list(record.get("experience", "")),
+                }
+            )
+
+        return {
+            "status": "success",
+            "data": user_profiles,
+        }
+    except Exception:
+        return {
+            "status": "error",
+            "message": "Could not retrieve user profiles.",
+        }
+
+
+def delete_user_profile_by_row(row_number: int) -> dict:
+    """Delete a user profile by its Google Sheets row number."""
+
+    try:
+        if row_number <= 1:
+            return {"status": "error"}
+
+        ws = get_worksheet("usersProfile")
+        ws.delete_rows(row_number)
+
+        return {"status": "success"}
+    except Exception:
+        return {"status": "error"}

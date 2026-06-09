@@ -50,8 +50,38 @@ def test_handle_menu_choice_resume_generation(monkeypatch):
     assert called == ["resume_generation"]
 
 
-def test_handle_menu_choice_exit(capsys):
+def test_handle_menu_choice_manage_users(monkeypatch):
+    called = []
+
+    monkeypatch.setattr(
+        cli,
+        "run_manage_users_flow",
+        lambda: called.append("manage_users"),
+    )
+
     result = cli.handle_menu_choice("4")
+
+    assert result is True
+    assert called == ["manage_users"]
+
+
+def test_handle_menu_choice_manage_jobs(monkeypatch):
+    called = []
+
+    monkeypatch.setattr(
+        cli,
+        "run_manage_jobs_flow",
+        lambda: called.append("manage_jobs"),
+    )
+
+    result = cli.handle_menu_choice("5")
+
+    assert result is True
+    assert called == ["manage_jobs"]
+
+
+def test_handle_menu_choice_exit(capsys):
+    result = cli.handle_menu_choice("6")
 
     captured = capsys.readouterr()
 

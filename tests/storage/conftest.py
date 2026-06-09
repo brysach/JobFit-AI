@@ -35,6 +35,14 @@ class _InMemoryWorksheet:
             records.append(record)
 
         return records
+    
+    def delete_rows(self, row_number: int) -> None:
+        row_index = row_number - 1
+
+        if row_index <= 0 or row_index >= len(self._rows):
+            raise IndexError("Invalid row number.")
+
+        del self._rows[row_index]
 
 
 @pytest.fixture(autouse=True)
