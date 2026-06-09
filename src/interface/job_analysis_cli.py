@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from src.engine.job_analysis import analyze_and_optionally_save
+from src.engine.job_analysis import analyze_job_description
+from src.engine.job_analysis import save_existing_job_analysis
 
 
 def _format_list(title: str, items: list[str]) -> list[str]:
@@ -70,25 +71,41 @@ def _read_multiline_input() -> str:
 def run_job_analysis_flow() -> dict:
     """Run the job description analysis option."""
 
-    print()
-    print("Job Description Analysis")
-    print("========================")
-    print("Paste a job description below.")
-    print("When finished, type END on its own line.")
-    print()
+    while True:
+        print()
+        print("Job Description Analysis")
+        print("========================")
+        print("Paste a job description below.")
+        print("When finished, type END on its own line.")
+        print()
 
-    job_description = _read_multiline_input()
+        job_description = _read_multiline_input()
 
-    save_choice = input("Save this job analysis? (y/n): ").strip().lower()
+        generate_choice = input("Generate job analysis? (y/n): ").strip().lower()
 
-    should_save = save_choice == "y"
+        if generate_choice != "y":
+            print("Job analysis was not generated. Paste a new job description.")
+            continue
 
-    response = analyze_and_optionally_save(
-        job_description,
-        save=should_save,
-    )
+        response = analyze_job_description(job_description)
 
-    print()
-    print(format_analysis_response(response))
+        print()
+        print(format_analysis_response(response))
 
-    return response
+        if response.get("status") != "success":
+            return response
+
+        save_choice = input("Save this job analysis? (y/n): ").strip().lower()
+
+        if save_choice == "y":
+            save_response = save_existing_job_analysis(response["data"])
+
+            if save_response.get("status") == "success":
+                response["save_status"] = save_response["save_status"]
+            else:
+                response["save_status"] = "error"
+
+            print()
+            print(f"Save Status: {response['save_status']}")
+
+        return response
