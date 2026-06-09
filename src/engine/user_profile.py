@@ -7,7 +7,6 @@ from src.storage.user_profile_storage import save_user_profile as save_user_prof
 
 
 REQUIRED_USER_PROFILE_KEYS = {
-    "user_id",
     "name",
     "education",
     "skills",
@@ -31,9 +30,6 @@ def _is_valid_user_profile(user_profile: dict) -> bool:
         return False
 
     if not all(key in user_profile for key in REQUIRED_USER_PROFILE_KEYS):
-        return False
-
-    if str(user_profile["user_id"]).strip() == "":
         return False
 
     if not _is_non_empty_string(user_profile["name"]):
@@ -63,18 +59,13 @@ def save_user_profile(user_profile: dict) -> dict:
             "message": "User profile is missing required information.",
         }
 
-    save_status = save_user_profile_record(user_profile)
+    save_response = save_user_profile_record(user_profile)
 
-    if save_status == "success":
+    if save_response.get("status") == "success":
         return {
             "status": "success",
             "save_status": "success",
-        }
-
-    if save_status == "exists":
-        return {
-            "status": "exists",
-            "message": "User profile already exists.",
+            "user_id": save_response.get("user_id"),
         }
 
     return {

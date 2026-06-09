@@ -1,14 +1,13 @@
-# tests/storage/test_storage.py
+# tests/storage/test_job_analysis_storage.py
 
 from __future__ import annotations
 
-from src.storage.job_analysis_storage import save_job_analysis
 from src.storage.job_analysis_storage import get_job_analysis
+from src.storage.job_analysis_storage import save_job_analysis
 
 
 def valid_job_analysis() -> dict:
     return {
-        "application_id": 1,
         "job_title": "Software Engineering Intern",
         "required_skills": ["Python", "Git"],
         "keywords": ["Python", "Git", "teamwork"],
@@ -18,36 +17,37 @@ def valid_job_analysis() -> dict:
 def test_save_job_analysis_success():
     result = save_job_analysis(valid_job_analysis())
 
-    assert result == "success"
+    assert result["status"] == "success"
+    assert result["application_id"] == 1
 
 
-def test_save_duplicate_job_analysis_exists():
-    job_analysis = valid_job_analysis()
+def test_save_job_analysis_generates_incrementing_ids():
+    first_result = save_job_analysis(valid_job_analysis())
+    second_result = save_job_analysis(valid_job_analysis())
 
-    first_result = save_job_analysis(job_analysis)
-    second_result = save_job_analysis(job_analysis)
-
-    assert first_result == "success"
-    assert second_result == "exists"
+    assert first_result["status"] == "success"
+    assert second_result["status"] == "success"
+    assert first_result["application_id"] == 1
+    assert second_result["application_id"] == 2
 
 
 def test_missing_required_fields_error():
     job_analysis = valid_job_analysis()
-    del job_analysis["application_id"]
+    del job_analysis["job_title"]
 
     result = save_job_analysis(job_analysis)
 
-    assert result == "error"
+    assert result["status"] == "error"
+
 
 def test_get_job_analysis_success():
-    job_analysis = valid_job_analysis()
+    save_result = save_job_analysis(valid_job_analysis())
+    application_id = save_result["application_id"]
 
-    save_result = save_job_analysis(job_analysis)
-    get_result = get_job_analysis(1)
+    get_result = get_job_analysis(application_id)
 
-    assert save_result == "success"
     assert get_result["status"] == "success"
-    assert get_result["data"]["application_id"] == 1
+    assert get_result["data"]["application_id"] == application_id
     assert get_result["data"]["job_title"] == "Software Engineering Intern"
     assert get_result["data"]["required_skills"] == ["Python", "Git"]
     assert get_result["data"]["keywords"] == ["Python", "Git", "teamwork"]

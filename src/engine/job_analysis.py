@@ -147,7 +147,11 @@ def analyze_and_optionally_save(
     application_id: int | str | None = None,
     save: bool = False,
 ) -> dict:
-    """Analyze a job description and optionally save the result."""
+    """Analyze a job description and optionally save the result.
+
+    application_id is accepted for backward compatibility, but new IDs
+    are generated automatically by the storage layer.
+    """
 
     response = analyze_job_description(job_description)
 
@@ -157,23 +161,19 @@ def analyze_and_optionally_save(
     if not save:
         return response
 
-    if application_id is None or str(application_id).strip() == "":
-        return {
-            "status": "missing_application_id",
-            "message": "Application ID is required to save the job analysis.",
-        }
-
     data = response["data"]
 
     job_analysis = {
-        "application_id": application_id,
         "job_title": data["job_title"],
         "required_skills": data["required_skills"],
         "keywords": data["keywords"],
     }
 
-    save_status = save_job_analysis(job_analysis)
+    save_response = save_job_analysis(job_analysis)
 
-    response["save_status"] = save_status
+    response["save_status"] = save_response.get("status", "error")
+
+    if save_response.get("status") == "success":
+        response["application_id"] = save_response.get("application_id")
 
     return response

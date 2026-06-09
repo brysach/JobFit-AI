@@ -122,9 +122,12 @@ def test_analyze_without_saving(monkeypatch):
 def test_analyze_and_save_success(monkeypatch):
     saved_record = {}
 
-    def fake_save_job_analysis(job_analysis: dict) -> str:
+    def fake_save_job_analysis(job_analysis: dict) -> dict:
         saved_record.update(job_analysis)
-        return "success"
+        return {
+            "status": "success",
+            "application_id": 1,
+        }
 
     monkeypatch.setattr(
         job_analysis,
@@ -140,29 +143,14 @@ def test_analyze_and_save_success(monkeypatch):
 
     result = job_analysis.analyze_and_optionally_save(
         sample_job_description(),
-        application_id=1,
         save=True,
     )
 
     assert result["status"] == "success"
     assert result["save_status"] == "success"
-    assert saved_record["application_id"] == 1
+    assert result["application_id"] == 1
+
+    assert "application_id" not in saved_record
     assert saved_record["job_title"] == "Software Engineering Intern"
     assert saved_record["required_skills"] == ["Python", "Git"]
     assert saved_record["keywords"] == ["Python", "Git", "teamwork"]
-
-
-def test_save_without_application_id_returns_error(monkeypatch):
-    monkeypatch.setattr(
-        job_analysis,
-        "call_gemini",
-        lambda prompt: sample_gemini_response(),
-    )
-
-    result = job_analysis.analyze_and_optionally_save(
-        sample_job_description(),
-        save=True,
-    )
-
-    assert result["status"] == "missing_application_id"
-    assert result["message"] == "Application ID is required to save the job analysis."

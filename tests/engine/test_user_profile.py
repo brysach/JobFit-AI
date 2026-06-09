@@ -7,7 +7,6 @@ import src.engine.user_profile as user_profile_engine
 
 def valid_user_profile() -> dict:
     return {
-        "user_id": 1,
         "name": "Bryan Estrada",
         "education": "B.S. Computer Science, University of California, Riverside",
         "skills": ["Python", "C++", "Git"],
@@ -16,17 +15,27 @@ def valid_user_profile() -> dict:
     }
 
 
+def valid_saved_user_profile() -> dict:
+    profile = valid_user_profile()
+    profile["user_id"] = 1
+    return profile
+
+
 def test_save_user_profile_success(monkeypatch):
     monkeypatch.setattr(
         user_profile_engine,
         "save_user_profile_record",
-        lambda user_profile: "success",
+        lambda user_profile: {
+            "status": "success",
+            "user_id": 1,
+        },
     )
 
     result = user_profile_engine.save_user_profile(valid_user_profile())
 
     assert result["status"] == "success"
     assert result["save_status"] == "success"
+    assert result["user_id"] == 1
 
 
 def test_save_user_profile_incomplete_profile():
@@ -39,24 +48,13 @@ def test_save_user_profile_incomplete_profile():
     assert result["message"] == "User profile is missing required information."
 
 
-def test_save_user_profile_exists(monkeypatch):
-    monkeypatch.setattr(
-        user_profile_engine,
-        "save_user_profile_record",
-        lambda user_profile: "exists",
-    )
-
-    result = user_profile_engine.save_user_profile(valid_user_profile())
-
-    assert result["status"] == "exists"
-    assert result["message"] == "User profile already exists."
-
-
 def test_save_user_profile_storage_error(monkeypatch):
     monkeypatch.setattr(
         user_profile_engine,
         "save_user_profile_record",
-        lambda user_profile: "error",
+        lambda user_profile: {
+            "status": "error",
+        },
     )
 
     result = user_profile_engine.save_user_profile(valid_user_profile())
@@ -68,7 +66,7 @@ def test_save_user_profile_storage_error(monkeypatch):
 def test_get_user_profile_success(monkeypatch):
     expected_response = {
         "status": "success",
-        "data": valid_user_profile(),
+        "data": valid_saved_user_profile(),
     }
 
     monkeypatch.setattr(
@@ -80,6 +78,7 @@ def test_get_user_profile_success(monkeypatch):
     result = user_profile_engine.get_user_profile(1)
 
     assert result["status"] == "success"
+    assert result["data"]["user_id"] == 1
     assert result["data"]["name"] == "Bryan Estrada"
 
 

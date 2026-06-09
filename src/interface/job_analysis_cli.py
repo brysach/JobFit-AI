@@ -50,6 +50,9 @@ def format_analysis_response(response: dict) -> str:
         lines.append("")
         lines.append(f"Save Status: {response['save_status']}")
 
+    if "application_id" in response:
+        lines.append(f"Application ID: {response['application_id']}")
+
     return "\n".join(lines)
 
 
@@ -81,15 +84,10 @@ def run_job_analysis_flow() -> dict:
 
     save_choice = input("Save this job analysis? (y/n): ").strip().lower()
 
-    application_id = None
     should_save = save_choice == "y"
-
-    if should_save:
-        application_id = input("Enter application ID: ").strip()
 
     response = analyze_and_optionally_save(
         job_description,
-        application_id=application_id,
         save=should_save,
     )
 
