@@ -35,6 +35,7 @@ def _read_multiline_items() -> list[str]:
 
     return items
 
+
 def format_user_profile_response(response: dict) -> str:
     """Format a user profile engine response for display."""
 
@@ -74,6 +75,19 @@ def run_user_profile_flow() -> dict:
         "projects": projects,
         "experience": experience,
     }
+
+    save_choice = input("Save this user profile? (y/n): ").strip().lower()
+
+    if save_choice != "y":
+        response = {
+            "status": "cancelled",
+            "message": "User profile was not saved.",
+        }
+
+        print()
+        print(response["message"])
+
+        return response
 
     response = save_user_profile(user_profile)
 

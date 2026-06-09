@@ -154,3 +154,55 @@ def test_analyze_and_save_success(monkeypatch):
     assert saved_record["job_title"] == "Software Engineering Intern"
     assert saved_record["required_skills"] == ["Python", "Git"]
     assert saved_record["keywords"] == ["Python", "Git", "teamwork"]
+
+def test_save_existing_job_analysis_success(monkeypatch):
+    saved_record = {}
+
+    def fake_save_job_analysis(job_analysis: dict) -> dict:
+        saved_record.update(job_analysis)
+        return {
+            "status": "success",
+            "application_id": 1,
+        }
+
+    monkeypatch.setattr(
+        job_analysis,
+        "save_job_analysis",
+        fake_save_job_analysis,
+    )
+
+    analysis_data = {
+        "job_title": "Software Engineering Intern",
+        "required_skills": ["Python", "Git"],
+        "preferred_skills": ["React"],
+        "responsibilities": ["Build web applications"],
+        "keywords": ["Python", "Git", "teamwork"],
+    }
+
+    result = job_analysis.save_existing_job_analysis(analysis_data)
+
+    assert result["status"] == "success"
+    assert result["save_status"] == "success"
+    assert result["application_id"] == 1
+    assert saved_record["job_title"] == "Software Engineering Intern"
+    assert saved_record["required_skills"] == ["Python", "Git"]
+    assert saved_record["keywords"] == ["Python", "Git", "teamwork"]
+
+
+def test_save_existing_job_analysis_storage_error(monkeypatch):
+    monkeypatch.setattr(
+        job_analysis,
+        "save_job_analysis",
+        lambda analysis_data: {"status": "error"},
+    )
+
+    analysis_data = {
+        "job_title": "Software Engineering Intern",
+        "required_skills": ["Python", "Git"],
+        "keywords": ["Python", "Git", "teamwork"],
+    }
+
+    result = job_analysis.save_existing_job_analysis(analysis_data)
+
+    assert result["status"] == "storage_error"
+    assert result["message"] == "Could not save job analysis."

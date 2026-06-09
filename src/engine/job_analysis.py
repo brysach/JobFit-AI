@@ -175,6 +175,51 @@ def analyze_and_optionally_save(
 
     return response
 
+def save_existing_job_analysis(analysis_data: dict) -> dict:
+    """Save an already generated job analysis.
+
+    This lets the interface generate first, show the result to the user,
+    and then save only if the user chooses to save.
+    """
+
+    if not isinstance(analysis_data, dict):
+        return {
+            "status": "storage_error",
+            "message": "Could not save job analysis.",
+        }
+
+    required_keys = {
+        "job_title",
+        "required_skills",
+        "keywords",
+    }
+
+    if not all(key in analysis_data for key in required_keys):
+        return {
+            "status": "storage_error",
+            "message": "Could not save job analysis.",
+        }
+
+    job_analysis = {
+        "job_title": analysis_data["job_title"],
+        "required_skills": analysis_data["required_skills"],
+        "keywords": analysis_data["keywords"],
+    }
+
+    save_response = save_job_analysis(job_analysis)
+
+    if save_response.get("status") == "success":
+        return {
+            "status": "success",
+            "save_status": "success",
+            "application_id": save_response.get("application_id"),
+        }
+
+    return {
+        "status": "storage_error",
+        "message": "Could not save job analysis.",
+    }
+
 def list_job_analyses() -> dict:
     """Return all saved job analyses."""
 
