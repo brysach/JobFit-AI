@@ -10,6 +10,7 @@ from src.storage.job_analysis_storage import delete_job_analysis_by_row
 from src.storage.job_analysis_storage import list_job_analyses as list_job_analysis_records
 
 REQUIRED_ANALYSIS_KEYS = {
+    "company_name",
     "job_title",
     "required_skills",
     "preferred_skills",
@@ -22,11 +23,14 @@ _EXTRACTION_PROMPT = """
 Analyze the following job description.
 
 Return ONLY valid JSON with these keys:
+- company_name: string
 - job_title: string
 - required_skills: list of strings
 - preferred_skills: list of strings
 - responsibilities: list of strings
 - keywords: list of strings
+
+If the company name is not clearly stated, use "Unknown".
 
 Job description:
 {job_description}
@@ -101,6 +105,8 @@ def _parse_analysis_response(response_text: str) -> dict | None:
     for key in list_keys:
         if not isinstance(data[key], list):
             return None
+        if not isinstance(data["company_name"], str):
+            return None
 
     return data
 
@@ -161,11 +167,11 @@ def analyze_and_optionally_save(
     data = response["data"]
 
     job_analysis = {
+        "company_name": data.get("company_name", "Unknown"),
         "job_title": data["job_title"],
         "required_skills": data["required_skills"],
         "keywords": data["keywords"],
     }
-
     save_response = save_job_analysis(job_analysis)
 
     response["save_status"] = save_response.get("status", "error")
@@ -176,11 +182,7 @@ def analyze_and_optionally_save(
     return response
 
 def save_existing_job_analysis(analysis_data: dict) -> dict:
-    """Save an already generated job analysis.
-
-    This lets the interface generate first, show the result to the user,
-    and then save only if the user chooses to save.
-    """
+    """Save an already generated job analysis."""
 
     if not isinstance(analysis_data, dict):
         return {
@@ -201,6 +203,7 @@ def save_existing_job_analysis(analysis_data: dict) -> dict:
         }
 
     job_analysis = {
+        "company_name": analysis_data.get("company_name", "Unknown"),
         "job_title": analysis_data["job_title"],
         "required_skills": analysis_data["required_skills"],
         "keywords": analysis_data["keywords"],

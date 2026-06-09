@@ -21,6 +21,7 @@ def sample_user_profile() -> dict:
 def sample_job_analysis() -> dict:
     return {
         "application_id": 1,
+        "company_name": "TechStart",
         "job_title": "Software Engineering Intern",
         "required_skills": ["Python", "Git"],
         "keywords": ["Python", "Git", "teamwork"],

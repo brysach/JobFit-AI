@@ -49,7 +49,7 @@ class _InMemoryWorksheet:
 def in_memory_worksheets(monkeypatch):
     worksheets = {
         "jobsAnalysis": _InMemoryWorksheet(
-            ["application_id", "job_title", "required_skills", "keywords"]
+            ["application_id", "company_name", "job_title", "required_skills", "keywords"]
         ),
         "usersProfile": _InMemoryWorksheet(
             ["user_id", "name", "education", "skills", "projects", "experience"]

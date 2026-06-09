@@ -9,6 +9,7 @@ def sample_success_response() -> dict:
     return {
         "status": "success",
         "data": {
+            "company_name": "TechStart",
             "job_title": "Software Engineering Intern",
             "required_skills": ["Python", "Git"],
             "preferred_skills": ["React"],
@@ -22,6 +23,7 @@ def test_format_analysis_response_success():
     output = job_analysis_cli.format_analysis_response(sample_success_response())
 
     assert "Job Analysis" in output
+    assert "Company: TechStart" in output
     assert "Job Title: Software Engineering Intern" in output
     assert "- Python" in output
     assert "- Git" in output

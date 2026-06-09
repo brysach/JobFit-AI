@@ -6,6 +6,7 @@ from src.storage.google_sheets import get_worksheet
 
 
 REQUIRED_JOB_ANALYSIS_KEYS = {
+    "company_name",
     "job_title",
     "required_skills",
     "keywords",
@@ -71,6 +72,7 @@ def save_job_analysis(job_analysis: dict) -> dict:
 
         row = [
             application_id,
+            job_analysis["company_name"],
             job_analysis["job_title"],
             ", ".join(job_analysis["required_skills"]),
             ", ".join(job_analysis["keywords"]),
@@ -99,6 +101,7 @@ def get_job_analysis(application_id: int | str) -> dict:
                     "status": "success",
                     "data": {
                         "application_id": record.get("application_id"),
+                        "company_name": record.get("company_name", "Unknown"),
                         "job_title": record.get("job_title", ""),
                         "required_skills": _comma_string_to_list(
                             record.get("required_skills", "")
@@ -133,6 +136,7 @@ def list_job_analyses() -> dict:
                 {
                     "row_number": index,
                     "application_id": record.get("application_id"),
+                    "company_name": record.get("company_name", "Unknown"),
                     "job_title": record.get("job_title", ""),
                     "required_skills": _comma_string_to_list(
                         record.get("required_skills", "")

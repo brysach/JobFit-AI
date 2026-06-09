@@ -19,6 +19,7 @@ REQUIRED_USER_PROFILE_KEYS = {
 }
 
 REQUIRED_JOB_ANALYSIS_KEYS = {
+    "company_name",
     "job_title",
     "required_skills",
     "keywords",
@@ -44,6 +45,8 @@ Return ONLY valid JSON with these keys:
 
 The resume bullets should be strong, specific, and matched to the job.
 The cover letter should be professional, concise, and tailored to the job.
+If the job analysis includes a company_name other than "Unknown", refer to the company by name when it sounds natural.
+If the company_name is "Unknown", use a general greeting such as "Dear Hiring Team".
 The warnings list should mention any job requirements that are weakly supported or missing from the user's profile.
 
 User profile:
@@ -105,6 +108,9 @@ def _is_valid_job_analysis(job_analysis: dict) -> bool:
         return False
 
     if not isinstance(job_analysis["keywords"], list):
+        return False
+    
+    if not isinstance(job_analysis["company_name"], str):
         return False
 
     return True
