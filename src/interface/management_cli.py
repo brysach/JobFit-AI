@@ -63,8 +63,9 @@ def format_user_profiles_summary_response(response: dict) -> str:
 
     for index, profile in enumerate(profiles, start=1):
         name = profile.get("name", "Unknown user")
-        education = profile.get("education", "")
-        lines.append(f"{index}. {name} | {education}")
+        university = profile.get("university", "")
+        degree = profile.get("degree", "")
+        lines.append(f"{index}. {name} | {university} | {degree}")
 
     return "\n".join(lines)
 
@@ -100,7 +101,10 @@ def format_user_profile_details(profile: dict) -> str:
         "Selected User Profile",
         "=====================",
         f"Name: {profile.get('name', 'Unknown user')}",
-        f"Education: {profile.get('education', '')}",
+        f"Email: {profile.get('email', '')}",
+        f"Phone: {profile.get('phone_number', '')}",
+        f"University: {profile.get('university', '')}",
+        f"Degree: {profile.get('degree', '')}",
         "",
     ]
 

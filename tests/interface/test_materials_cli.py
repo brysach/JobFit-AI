@@ -11,12 +11,22 @@ def sample_success_response() -> dict:
     return {
         "status": "success",
         "data": {
-            "resume_bullets": [
-                "Built JobFit-AI using Python, Git, and layered architecture.",
-                "Implemented tested storage and engine layers for structured application data.",
+            "resume": {
+                "skills": ["Python", "Git"],
+                "projects": [
+                    "Built JobFit-AI using Python, Git, and layered architecture."
+                ],
+                "experience": [
+                    "Tutored students in problem-solving and communication."
+                ],
+            },
+            "cover_letter": "Dear TechStart Hiring Team, I am excited to apply.",
+            "strengths": [
+                "Use your Python and Git experience to explain your project workflow."
             ],
-            "cover_letter": "Dear Hiring Manager, I am excited to apply.",
-            "warnings": ["No direct React experience was found."],
+            "weaknesses": [
+                "Practice technical assessment questions before interviewing."
+            ],
         },
     }
 
@@ -29,7 +39,10 @@ def sample_user_profiles_response() -> dict:
                 "row_number": 2,
                 "user_id": 10,
                 "name": "Bryan Estrada",
-                "education": "B.S. Computer Science student",
+                "email": "bryan@example.com",
+                "phone_number": "555-123-4567",
+                "university": "University of California, Riverside",
+                "degree": "B.S. Computer Science",
                 "skills": ["Python", "Git"],
                 "projects": ["JobFit-AI"],
                 "experience": ["Math tutor"],
@@ -38,7 +51,10 @@ def sample_user_profiles_response() -> dict:
                 "row_number": 3,
                 "user_id": 11,
                 "name": "Sofia Martinez",
-                "education": "B.S. Information Systems student",
+                "email": "sofia@example.com",
+                "phone_number": "555-987-6543",
+                "university": "California State University, Fullerton",
+                "degree": "B.S. Information Systems",
                 "skills": ["Java", "SQL"],
                 "projects": ["Inventory Tracker"],
                 "experience": ["Retail associate"],
@@ -75,12 +91,19 @@ def test_format_materials_response_success():
     output = materials_cli.format_materials_response(sample_success_response())
 
     assert "Generated Application Materials" in output
-    assert "Resume Bullets:" in output
+    assert "Resume Preview" in output
+    assert "Skills:" in output
+    assert "- Python" in output
+    assert "Projects:" in output
     assert "- Built JobFit-AI using Python, Git, and layered architecture." in output
+    assert "Experience:" in output
+    assert "- Tutored students in problem-solving and communication." in output
     assert "Cover Letter:" in output
-    assert "Dear Hiring Manager" in output
-    assert "Warnings:" in output
-    assert "- No direct React experience was found." in output
+    assert "Dear TechStart Hiring Team" in output
+    assert "Strengths:" in output
+    assert "- Use your Python and Git experience to explain your project workflow." in output
+    assert "Weaknesses:" in output
+    assert "- Practice technical assessment questions before interviewing." in output
 
 
 def test_format_materials_response_with_save_status():
@@ -194,46 +217,6 @@ def test_run_resume_generation_flow_user_selection_not_confirmed(monkeypatch):
     assert generate_was_called is False
 
 
-def test_run_resume_generation_flow_job_selection_not_confirmed(monkeypatch):
-    inputs = iter(["1", "y", "2", "n"])
-    generate_was_called = False
-
-    def fake_input(prompt: str = "") -> str:
-        return next(inputs)
-
-    def fake_generate_materials_for_saved_records(
-        user_id: int | str,
-        application_id: int | str,
-        save: bool = False,
-    ) -> dict:
-        nonlocal generate_was_called
-        generate_was_called = True
-        return sample_success_response()
-
-    monkeypatch.setattr(builtins, "input", fake_input)
-    monkeypatch.setattr(
-        materials_cli,
-        "list_user_profiles",
-        lambda: sample_user_profiles_response(),
-    )
-    monkeypatch.setattr(
-        materials_cli,
-        "list_job_analyses",
-        lambda: sample_job_analyses_response(),
-    )
-    monkeypatch.setattr(
-        materials_cli,
-        "generate_materials_for_saved_records",
-        fake_generate_materials_for_saved_records,
-    )
-
-    result = materials_cli.run_resume_generation_flow()
-
-    assert result["status"] == "cancelled"
-    assert result["message"] == "Resume generation cancelled."
-    assert generate_was_called is False
-
-
 def test_run_resume_generation_flow_back_from_user_selection(monkeypatch):
     inputs = iter(["BACK"])
     generate_was_called = False
@@ -255,81 +238,6 @@ def test_run_resume_generation_flow_back_from_user_selection(monkeypatch):
         materials_cli,
         "list_user_profiles",
         lambda: sample_user_profiles_response(),
-    )
-    monkeypatch.setattr(
-        materials_cli,
-        "generate_materials_for_saved_records",
-        fake_generate_materials_for_saved_records,
-    )
-
-    result = materials_cli.run_resume_generation_flow()
-
-    assert result["status"] == "cancelled"
-    assert result["message"] == "Returned to main menu."
-    assert generate_was_called is False
-
-
-def test_run_resume_generation_flow_back_from_user_confirmation(monkeypatch):
-    inputs = iter(["1", "BACK"])
-    generate_was_called = False
-
-    def fake_input(prompt: str = "") -> str:
-        return next(inputs)
-
-    def fake_generate_materials_for_saved_records(
-        user_id: int | str,
-        application_id: int | str,
-        save: bool = False,
-    ) -> dict:
-        nonlocal generate_was_called
-        generate_was_called = True
-        return sample_success_response()
-
-    monkeypatch.setattr(builtins, "input", fake_input)
-    monkeypatch.setattr(
-        materials_cli,
-        "list_user_profiles",
-        lambda: sample_user_profiles_response(),
-    )
-    monkeypatch.setattr(
-        materials_cli,
-        "generate_materials_for_saved_records",
-        fake_generate_materials_for_saved_records,
-    )
-
-    result = materials_cli.run_resume_generation_flow()
-
-    assert result["status"] == "cancelled"
-    assert result["message"] == "Returned to main menu."
-    assert generate_was_called is False
-
-
-def test_run_resume_generation_flow_back_from_job_selection(monkeypatch):
-    inputs = iter(["1", "y", "BACK"])
-    generate_was_called = False
-
-    def fake_input(prompt: str = "") -> str:
-        return next(inputs)
-
-    def fake_generate_materials_for_saved_records(
-        user_id: int | str,
-        application_id: int | str,
-        save: bool = False,
-    ) -> dict:
-        nonlocal generate_was_called
-        generate_was_called = True
-        return sample_success_response()
-
-    monkeypatch.setattr(builtins, "input", fake_input)
-    monkeypatch.setattr(
-        materials_cli,
-        "list_user_profiles",
-        lambda: sample_user_profiles_response(),
-    )
-    monkeypatch.setattr(
-        materials_cli,
-        "list_job_analyses",
-        lambda: sample_job_analyses_response(),
     )
     monkeypatch.setattr(
         materials_cli,
@@ -417,6 +325,53 @@ def test_run_resume_generation_flow_invalid_job_selection(monkeypatch):
     assert result["status"] == "invalid_selection"
     assert result["message"] == "Please choose a valid entry number."
     assert generate_was_called is False
+
+
+def test_run_resume_generation_flow_missing_user_id(monkeypatch):
+    inputs = iter(["1"])
+    users_response = sample_user_profiles_response()
+    users_response["data"][0]["user_id"] = None
+
+    def fake_input(prompt: str = "") -> str:
+        return next(inputs)
+
+    monkeypatch.setattr(builtins, "input", fake_input)
+    monkeypatch.setattr(
+        materials_cli,
+        "list_user_profiles",
+        lambda: users_response,
+    )
+
+    result = materials_cli.run_resume_generation_flow()
+
+    assert result["status"] == "invalid_selection"
+    assert result["message"] == "Selected user profile is missing its user ID."
+
+
+def test_run_resume_generation_flow_missing_application_id(monkeypatch):
+    inputs = iter(["1", "y", "1"])
+    jobs_response = sample_job_analyses_response()
+    jobs_response["data"][0]["application_id"] = None
+
+    def fake_input(prompt: str = "") -> str:
+        return next(inputs)
+
+    monkeypatch.setattr(builtins, "input", fake_input)
+    monkeypatch.setattr(
+        materials_cli,
+        "list_user_profiles",
+        lambda: sample_user_profiles_response(),
+    )
+    monkeypatch.setattr(
+        materials_cli,
+        "list_job_analyses",
+        lambda: jobs_response,
+    )
+
+    result = materials_cli.run_resume_generation_flow()
+
+    assert result["status"] == "invalid_selection"
+    assert result["message"] == "Selected job analysis is missing its application ID."
 
 
 def test_run_resume_generation_flow_no_user_profiles(monkeypatch):

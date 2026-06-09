@@ -5,14 +5,17 @@ from __future__ import annotations
 import json
 
 from src.engine.gemini_client import call_gemini
-from src.storage.job_analysis_storage import get_job_analysis as get_job_analysis_record
+from src.storage.job_analysis_storage import get_job_analysis
 from src.storage.materials_storage import save_generated_materials as save_generated_materials_record
-from src.storage.user_profile_storage import get_user_profile as get_user_profile_record
+from src.storage.user_profile_storage import get_user_profile
 
 
 REQUIRED_USER_PROFILE_KEYS = {
     "name",
-    "education",
+    "email",
+    "phone_number",
+    "university",
+    "degree",
     "skills",
     "projects",
     "experience",
@@ -25,29 +28,51 @@ REQUIRED_JOB_ANALYSIS_KEYS = {
     "keywords",
 }
 
-REQUIRED_GENERATED_MATERIALS_KEYS = {
-    "resume_bullets",
+REQUIRED_MATERIALS_KEYS = {
+    "resume",
     "cover_letter",
-    "warnings",
+    "strengths",
+    "weaknesses",
 }
 
-
 _MATERIALS_PROMPT = """
-You are helping generate application materials.
+You are helping generate professional application materials.
 
 Use ONLY the user's provided background.
 Do not invent experience, skills, education, projects, or achievements.
 
 Return ONLY valid JSON with these keys:
-- resume_bullets: list of strings
+- resume: object with these keys:
+  - skills: list of strings
+  - projects: list of strings
+  - experience: list of strings
 - cover_letter: string
-- warnings: list of strings
+- strengths: list of strings
+- weaknesses: list of strings
 
-The resume bullets should be strong, specific, and matched to the job.
-The cover letter should be professional, concise, and tailored to the job.
-If the job analysis includes a company_name other than "Unknown", refer to the company by name when it sounds natural.
-If the company_name is "Unknown", use a general greeting such as "Dear Hiring Team".
-The warnings list should mention any job requirements that are weakly supported or missing from the user's profile.
+Resume instructions:
+- The resume content will later be inserted into a professional .docx template.
+- Do not include the user's name, email, phone number, university, or degree in the generated resume object.
+- For resume.skills, choose or rewrite skill bullets based only on the user's provided skills and the job analysis.
+- For resume.projects, write strong resume bullets based only on the user's provided projects and the job analysis.
+- For resume.experience, write strong resume bullets based only on the user's provided experience and the job analysis.
+- Keep resume bullets concise, professional, and matched to the job.
+
+Cover letter instructions:
+- The cover letter should be professional, concise, and tailored to the job.
+- If the job analysis includes a company_name other than "Unknown", refer to the company by name when it sounds natural.
+- If the company_name is "Unknown", use a general greeting such as "Dear Hiring Team".
+
+Strengths instructions:
+- List the user's strongest matches for this job.
+- Explain how the user can use those strengths in an interview, resume discussion, or assessment.
+- Keep each strength practical and specific.
+
+Weaknesses instructions:
+- List the user's weakest areas or missing requirements for this job.
+- Explain how the user can prepare for those weaknesses before an interview or assessment test.
+- Be honest but constructive.
+- Do not shame the user.
 
 User profile:
 {user_profile}
@@ -57,86 +82,81 @@ Job analysis:
 """
 
 
-def _is_non_empty_string(value) -> bool:
-    return isinstance(value, str) and value.strip() != ""
+def _clean_json_response(text: str) -> str:
+    cleaned_text = text.strip()
+
+    if cleaned_text.startswith("```json"):
+        cleaned_text = cleaned_text.removeprefix("```json").strip()
+
+    if cleaned_text.startswith("```"):
+        cleaned_text = cleaned_text.removeprefix("```").strip()
+
+    if cleaned_text.endswith("```"):
+        cleaned_text = cleaned_text.removesuffix("```").strip()
+
+    return cleaned_text
 
 
-def _is_non_empty_list(value) -> bool:
-    return isinstance(value, list) and len(value) > 0
+def _is_string_list(value: object) -> bool:
+    return isinstance(value, list) and all(isinstance(item, str) for item in value)
 
 
 def _is_valid_user_profile(user_profile: dict) -> bool:
-    """Return True if the user profile has enough information."""
-
     if not isinstance(user_profile, dict):
         return False
 
-    if not all(key in user_profile for key in REQUIRED_USER_PROFILE_KEYS):
+    if not REQUIRED_USER_PROFILE_KEYS.issubset(user_profile.keys()):
         return False
 
-    if not _is_non_empty_string(user_profile["name"]):
-        return False
+    string_keys = {
+        "name",
+        "email",
+        "phone_number",
+        "university",
+        "degree",
+    }
 
-    if not _is_non_empty_string(user_profile["education"]):
-        return False
+    for key in string_keys:
+        if not isinstance(user_profile[key], str) or user_profile[key].strip() == "":
+            return False
 
-    if not _is_non_empty_list(user_profile["skills"]):
-        return False
+    list_keys = {
+        "skills",
+        "projects",
+        "experience",
+    }
 
-    if not _is_non_empty_list(user_profile["projects"]):
-        return False
-
-    if not _is_non_empty_list(user_profile["experience"]):
-        return False
+    for key in list_keys:
+        if not _is_string_list(user_profile[key]):
+            return False
 
     return True
 
 
 def _is_valid_job_analysis(job_analysis: dict) -> bool:
-    """Return True if the job analysis has enough information."""
-
     if not isinstance(job_analysis, dict):
         return False
 
-    if not all(key in job_analysis for key in REQUIRED_JOB_ANALYSIS_KEYS):
+    if not REQUIRED_JOB_ANALYSIS_KEYS.issubset(job_analysis.keys()):
         return False
 
-    if not _is_non_empty_string(job_analysis["job_title"]):
-        return False
-
-    if not _is_non_empty_list(job_analysis["required_skills"]):
-        return False
-
-    if not isinstance(job_analysis["keywords"], list):
-        return False
-    
     if not isinstance(job_analysis["company_name"], str):
+        return False
+
+    if not isinstance(job_analysis["job_title"], str):
+        return False
+
+    if not _is_string_list(job_analysis["required_skills"]):
+        return False
+
+    if not _is_string_list(job_analysis["keywords"]):
         return False
 
     return True
 
 
-def _clean_json_response(response_text: str) -> str:
-    """Remove Markdown code fences from Gemini JSON output."""
-
-    text = response_text.strip()
-
-    if text.startswith("```json"):
-        text = text.removeprefix("```json").strip()
-
-    if text.startswith("```"):
-        text = text.removeprefix("```").strip()
-
-    if text.endswith("```"):
-        text = text.removesuffix("```").strip()
-
-    return text
-
-
-def _parse_materials_response(response_text: str) -> dict | None:
-    """Parse and validate Gemini's generated materials response."""
-
-    cleaned_text = _clean_json_response(response_text)
+def _parse_materials_response(text: str) -> dict | None:
+    cleaned_text = _clean_json_response(text)
 
     try:
         data = json.loads(cleaned_text)
@@ -146,28 +166,60 @@ def _parse_materials_response(response_text: str) -> dict | None:
     if not isinstance(data, dict):
         return None
 
-    if not all(key in data for key in REQUIRED_GENERATED_MATERIALS_KEYS):
+    if not REQUIRED_MATERIALS_KEYS.issubset(data.keys()):
         return None
 
-    if not _is_non_empty_list(data["resume_bullets"]):
+    resume = data["resume"]
+
+    if not isinstance(resume, dict):
         return None
 
-    if not _is_non_empty_string(data["cover_letter"]):
+    resume_keys = {
+        "skills",
+        "projects",
+        "experience",
+    }
+
+    if not resume_keys.issubset(resume.keys()):
         return None
 
-    if not isinstance(data["warnings"], list):
+    if not _is_string_list(resume["skills"]):
         return None
 
-    return data
+    if not _is_string_list(resume["projects"]):
+        return None
+
+    if not _is_string_list(resume["experience"]):
+        return None
+
+    if not isinstance(data["cover_letter"], str):
+        return None
+
+    if not _is_string_list(data["strengths"]):
+        return None
+
+    if not _is_string_list(data["weaknesses"]):
+        return None
+
+    return {
+        "resume": {
+            "skills": resume["skills"],
+            "projects": resume["projects"],
+            "experience": resume["experience"],
+        },
+        "cover_letter": data["cover_letter"],
+        "strengths": data["strengths"],
+        "weaknesses": data["weaknesses"],
+    }
 
 
 def generate_application_materials(user_profile: dict, job_analysis: dict) -> dict:
-    """Generate resume bullets and a cover letter from profile and job data."""
+    """Generate structured resume content, cover letter, strengths, and weaknesses."""
 
     if not _is_valid_user_profile(user_profile):
         return {
             "status": "incomplete_profile",
-            "message": "User profile is missing required information.",
+            "message": "User profile is required before generating materials.",
         }
 
     if not _is_valid_job_analysis(job_analysis):
@@ -182,24 +234,24 @@ def generate_application_materials(user_profile: dict, job_analysis: dict) -> di
     )
 
     try:
-        response_text = call_gemini(prompt)
+        gemini_response = call_gemini(prompt)
     except Exception:
         return {
             "status": "ai_error",
             "message": "Could not generate application materials.",
         }
 
-    data = _parse_materials_response(response_text)
+    materials_data = _parse_materials_response(gemini_response)
 
-    if data is None:
+    if materials_data is None:
         return {
             "status": "generation_failed",
-            "message": "Generated content was empty or invalid.",
+            "message": "Could not understand the generated materials.",
         }
 
     return {
         "status": "success",
-        "data": data,
+        "data": materials_data,
     }
 
 
@@ -208,60 +260,41 @@ def generate_materials_for_saved_records(
     application_id: int | str,
     save: bool = False,
 ) -> dict:
-    """Generate materials using saved user profile and saved job analysis.
+    """Generate materials from saved user and job records."""
 
-    This keeps the architecture flow as:
-    interface -> engine -> storage
-    """
+    user_response = get_user_profile(user_id)
 
-    if user_id is None or str(user_id).strip() == "":
-        return {
-            "status": "incomplete_profile",
-            "message": "User profile is missing required information.",
-        }
+    if user_response.get("status") != "success":
+        return user_response
 
-    if application_id is None or str(application_id).strip() == "":
-        return {
-            "status": "missing_job_analysis",
-            "message": "Job analysis is required before generating materials.",
-        }
+    job_response = get_job_analysis(application_id)
 
-    user_profile_response = get_user_profile_record(user_id)
+    if job_response.get("status") != "success":
+        return job_response
 
-    if user_profile_response.get("status") != "success":
-        return {
-            "status": "incomplete_profile",
-            "message": "User profile is missing required information.",
-        }
-
-    job_analysis_response = get_job_analysis_record(application_id)
-
-    if job_analysis_response.get("status") != "success":
-        return {
-            "status": "missing_job_analysis",
-            "message": "Job analysis is required before generating materials.",
-        }
-
-    user_profile = user_profile_response["data"]
-    job_analysis = job_analysis_response["data"]
+    user_profile = user_response["data"]
+    job_analysis = job_response["data"]
 
     response = generate_application_materials(user_profile, job_analysis)
 
     if response.get("status") != "success":
         return response
 
-    if not save:
-        return response
+    if save:
+        data = response["data"]
 
-    materials = {
-        "application_id": application_id,
-        "user_id": user_id,
-        "resume_bullets": response["data"]["resume_bullets"],
-        "cover_letter": response["data"]["cover_letter"],
-    }
+        save_record = {
+            "application_id": application_id,
+            "user_id": user_id,
+            "resume_skills": data["resume"]["skills"],
+            "resume_projects": data["resume"]["projects"],
+            "resume_experience": data["resume"]["experience"],
+            "cover_letter": data["cover_letter"],
+            "strengths": data["strengths"],
+            "weaknesses": data["weaknesses"],
+        }
 
-    save_status = save_generated_materials_record(materials)
-
-    response["save_status"] = save_status
+        save_status = save_generated_materials_record(save_record)
+        response["save_status"] = save_status
 
     return response

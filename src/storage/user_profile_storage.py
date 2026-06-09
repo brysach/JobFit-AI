@@ -9,39 +9,21 @@ from src.storage.google_sheets import get_worksheet
 
 REQUIRED_USER_PROFILE_KEYS = {
     "name",
-    "education",
+    "email",
+    "phone_number",
+    "university",
+    "degree",
     "skills",
     "projects",
     "experience",
 }
 
 
-def _list_to_json(items: list[str]) -> str:
-    """Convert a list of strings to a JSON string for Google Sheets."""
-
-    return json.dumps(items)
-
-
-def _json_to_list(value: object) -> list[str]:
-    """Convert a JSON string from Google Sheets back to a list of strings."""
-
-    if not isinstance(value, str):
-        value = str(value)
-
-    try:
-        data = json.loads(value)
-    except (json.JSONDecodeError, TypeError):
-        return []
-
-    if not isinstance(data, list):
-        return []
-
-    return [str(item) for item in data]
+def _get_user_profile_worksheet():
+    return get_worksheet("usersProfile")
 
 
 def _parse_existing_id(value: object) -> int | None:
-    """Convert an existing sheet ID into an int if possible."""
-
     text = str(value).strip().lstrip("'")
 
     try:
@@ -51,8 +33,6 @@ def _parse_existing_id(value: object) -> int | None:
 
 
 def _get_next_user_id(ws) -> int:
-    """Return the next user_id using max existing ID + 1."""
-
     existing_ids = ws.col_values(1)
     numeric_ids = []
 
@@ -68,24 +48,48 @@ def _get_next_user_id(ws) -> int:
     return max(numeric_ids) + 1
 
 
-def save_user_profile(user_profile: dict) -> dict:
-    """Save user profile data."""
+def _json_to_list(value: object) -> list[str]:
+    if not isinstance(value, str):
+        value = str(value)
 
-    if not all(key in user_profile for key in REQUIRED_USER_PROFILE_KEYS):
+    try:
+        data = json.loads(value)
+    except (json.JSONDecodeError, TypeError):
+        return []
+
+    if not isinstance(data, list):
+        return []
+
+    return [str(item) for item in data]
+
+
+def _ids_match(left: object, right: object) -> bool:
+    return str(left).strip().lstrip("'") == str(right).strip().lstrip("'")
+
+
+def save_user_profile(user_profile: dict) -> dict:
+    """Save a user profile to Google Sheets."""
+
+    if not isinstance(user_profile, dict):
+        return {"status": "error"}
+
+    if not REQUIRED_USER_PROFILE_KEYS.issubset(user_profile.keys()):
         return {"status": "error"}
 
     try:
-        ws = get_worksheet("usersProfile")
-
+        ws = _get_user_profile_worksheet()
         user_id = _get_next_user_id(ws)
 
         row = [
             user_id,
             user_profile["name"],
-            user_profile["education"],
-            _list_to_json(user_profile["skills"]),
-            _list_to_json(user_profile["projects"]),
-            _list_to_json(user_profile["experience"]),
+            user_profile["email"],
+            user_profile["phone_number"],
+            user_profile["university"],
+            user_profile["degree"],
+            json.dumps(user_profile["skills"]),
+            json.dumps(user_profile["projects"]),
+            json.dumps(user_profile["experience"]),
         ]
 
         ws.append_row(row)
@@ -99,23 +103,26 @@ def save_user_profile(user_profile: dict) -> dict:
 
 
 def get_user_profile(user_id: int | str) -> dict:
-    """Retrieve a user profile by user_id."""
+    """Retrieve one user profile by backend user_id."""
 
     try:
-        ws = get_worksheet("usersProfile")
+        ws = _get_user_profile_worksheet()
         records = ws.get_all_records()
 
         for record in records:
-            if str(record.get("user_id")) == str(user_id):
+            if _ids_match(record.get("user_id"), user_id):
                 return {
                     "status": "success",
                     "data": {
                         "user_id": record.get("user_id"),
                         "name": record.get("name", ""),
-                        "education": record.get("education", ""),
-                        "skills": _json_to_list(record.get("skills", "")),
-                        "projects": _json_to_list(record.get("projects", "")),
-                        "experience": _json_to_list(record.get("experience", "")),
+                        "email": record.get("email", ""),
+                        "phone_number": record.get("phone_number", ""),
+                        "university": record.get("university", ""),
+                        "degree": record.get("degree", ""),
+                        "skills": _json_to_list(record.get("skills", "[]")),
+                        "projects": _json_to_list(record.get("projects", "[]")),
+                        "experience": _json_to_list(record.get("experience", "[]")),
                     },
                 }
 
@@ -125,17 +132,18 @@ def get_user_profile(user_id: int | str) -> dict:
         }
     except Exception:
         return {
-            "status": "not_found",
-            "message": "User profile was not found.",
+            "status": "error",
+            "message": "Could not retrieve user profile.",
         }
 
 
 def list_user_profiles() -> dict:
-    """Return all saved user profiles with their sheet row numbers."""
+    """Return all saved user profiles."""
 
     try:
-        ws = get_worksheet("usersProfile")
+        ws = _get_user_profile_worksheet()
         records = ws.get_all_records()
+
         user_profiles = []
 
         for index, record in enumerate(records, start=2):
@@ -144,10 +152,13 @@ def list_user_profiles() -> dict:
                     "row_number": index,
                     "user_id": record.get("user_id"),
                     "name": record.get("name", ""),
-                    "education": record.get("education", ""),
-                    "skills": _json_to_list(record.get("skills", "")),
-                    "projects": _json_to_list(record.get("projects", "")),
-                    "experience": _json_to_list(record.get("experience", "")),
+                    "email": record.get("email", ""),
+                    "phone_number": record.get("phone_number", ""),
+                    "university": record.get("university", ""),
+                    "degree": record.get("degree", ""),
+                    "skills": _json_to_list(record.get("skills", "[]")),
+                    "projects": _json_to_list(record.get("projects", "[]")),
+                    "experience": _json_to_list(record.get("experience", "[]")),
                 }
             )
 
@@ -163,15 +174,18 @@ def list_user_profiles() -> dict:
 
 
 def delete_user_profile_by_row(row_number: int) -> dict:
-    """Delete a user profile by its Google Sheets row number."""
+    """Delete one user profile by Google Sheet row number."""
 
     try:
-        if row_number <= 1:
-            return {"status": "error"}
-
-        ws = get_worksheet("usersProfile")
+        ws = _get_user_profile_worksheet()
         ws.delete_rows(row_number)
 
-        return {"status": "success"}
+        return {
+            "status": "success",
+            "message": "User profile deleted successfully.",
+        }
     except Exception:
-        return {"status": "error"}
+        return {
+            "status": "error",
+            "message": "Could not delete user profile.",
+        }

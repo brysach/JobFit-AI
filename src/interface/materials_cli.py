@@ -35,6 +35,25 @@ def _invalid_selection_response() -> dict:
     }
 
 
+def _missing_id_response(message: str) -> dict:
+    return {
+        "status": "invalid_selection",
+        "message": message,
+    }
+
+
+def _get_required_id(value: object) -> int | str | None:
+    """Return a valid backend ID, or None if the ID is missing."""
+
+    if isinstance(value, int):
+        return value
+
+    if isinstance(value, str) and value.strip() != "":
+        return value
+
+    return None
+
+
 def _get_selected_entry(entries: list[dict], selection: str) -> dict | None:
     """Return the selected entry using the displayed list number."""
 
@@ -50,7 +69,7 @@ def _get_selected_entry(entries: list[dict], selection: str) -> dict | None:
 
 
 def format_materials_response(response: dict) -> str:
-    """Format generated resume and cover letter materials for display."""
+    """Format generated resume, cover letter, strengths, and weaknesses."""
 
     status = response.get("status")
 
@@ -58,21 +77,34 @@ def format_materials_response(response: dict) -> str:
         return response.get("message", "Something went wrong.")
 
     data = response.get("data", {})
+    resume = data.get("resume", {})
 
     lines = [
         "Generated Application Materials",
         "===============================",
         "",
+        "Resume Preview",
+        "==============",
+        "",
     ]
 
-    lines.extend(_format_list("Resume Bullets", data.get("resume_bullets", [])))
+    lines.extend(_format_list("Skills", resume.get("skills", [])))
+    lines.append("")
+
+    lines.extend(_format_list("Projects", resume.get("projects", [])))
+    lines.append("")
+
+    lines.extend(_format_list("Experience", resume.get("experience", [])))
     lines.append("")
 
     lines.append("Cover Letter:")
     lines.append(data.get("cover_letter", ""))
 
     lines.append("")
-    lines.extend(_format_list("Warnings", data.get("warnings", [])))
+    lines.extend(_format_list("Strengths", data.get("strengths", [])))
+
+    lines.append("")
+    lines.extend(_format_list("Weaknesses", data.get("weaknesses", [])))
 
     if "save_status" in response:
         lines.append("")
@@ -151,6 +183,15 @@ def run_resume_generation_flow() -> dict:
         print(response["message"])
         return response
 
+    selected_user_id = _get_required_id(selected_user.get("user_id"))
+
+    if selected_user_id is None:
+        response = _missing_id_response(
+            "Selected user profile is missing its user ID."
+        )
+        print(response["message"])
+        return response
+
     user_confirmed = _confirm_selected_user(selected_user)
 
     if user_confirmed is None:
@@ -198,6 +239,15 @@ def run_resume_generation_flow() -> dict:
         print(response["message"])
         return response
 
+    selected_application_id = _get_required_id(selected_job.get("application_id"))
+
+    if selected_application_id is None:
+        response = _missing_id_response(
+            "Selected job analysis is missing its application ID."
+        )
+        print(response["message"])
+        return response
+
     job_confirmed = _confirm_selected_job(selected_job)
 
     if job_confirmed is None:
@@ -224,8 +274,8 @@ def run_resume_generation_flow() -> dict:
     should_save = save_choice.strip().lower() == "y"
 
     response = generate_materials_for_saved_records(
-        user_id=selected_user["user_id"],
-        application_id=selected_job["application_id"],
+        user_id=selected_user_id,
+        application_id=selected_application_id,
         save=should_save,
     )
 
@@ -244,13 +294,14 @@ def run_resume_generation_flow() -> dict:
 
     if export_choice.strip().lower() == "y":
         filename = (
-            f"resume_materials_user_{selected_user['user_id']}"
-            f"_application_{selected_job['application_id']}.docx"
+            f"resume_materials_user_{selected_user_id}"
+            f"_application_{selected_application_id}.docx"
         )
 
         try:
             file_path = export_materials_to_docx(
-                response["data"],
+                materials_data=response["data"],
+                user_profile=selected_user,
                 filename=filename,
             )
             print(f"File saved to: {file_path}")
