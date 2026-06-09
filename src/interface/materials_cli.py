@@ -9,8 +9,10 @@ from src.export.resume_docx import export_materials_to_docx
 from src.interface.input_utils import cancelled_response
 from src.interface.input_utils import input_or_back
 from src.interface.input_utils import print_back_instruction
-from src.interface.management_cli import format_job_analyses_response
-from src.interface.management_cli import format_user_profiles_response
+from src.interface.management_cli import format_job_analyses_summary_response
+from src.interface.management_cli import format_job_analysis_details
+from src.interface.management_cli import format_user_profiles_summary_response
+from src.interface.management_cli import format_user_profile_details
 
 
 def _format_list(title: str, items: list[str]) -> list[str]:
@@ -79,6 +81,36 @@ def format_materials_response(response: dict) -> str:
     return "\n".join(lines)
 
 
+def _confirm_selected_user(selected_user: dict) -> bool | None:
+    """Show selected user details and ask for confirmation."""
+
+    print()
+    print(format_user_profile_details(selected_user))
+
+    print()
+    confirm_choice = input_or_back("Use this user profile? (y/n): ")
+
+    if confirm_choice is None:
+        return None
+
+    return confirm_choice.strip().lower() == "y"
+
+
+def _confirm_selected_job(selected_job: dict) -> bool | None:
+    """Show selected job details and ask for confirmation."""
+
+    print()
+    print(format_job_analysis_details(selected_job))
+
+    print()
+    confirm_choice = input_or_back("Use this job analysis? (y/n): ")
+
+    if confirm_choice is None:
+        return None
+
+    return confirm_choice.strip().lower() == "y"
+
+
 def run_resume_generation_flow() -> dict:
     """Run the resume and cover letter generation option."""
 
@@ -90,7 +122,7 @@ def run_resume_generation_flow() -> dict:
     user_profiles_response = list_user_profiles()
 
     print()
-    print(format_user_profiles_response(user_profiles_response))
+    print(format_user_profiles_summary_response(user_profiles_response))
 
     if user_profiles_response.get("status") != "success":
         return user_profiles_response
@@ -119,10 +151,25 @@ def run_resume_generation_flow() -> dict:
         print(response["message"])
         return response
 
+    user_confirmed = _confirm_selected_user(selected_user)
+
+    if user_confirmed is None:
+        response = cancelled_response()
+        print(response["message"])
+        return response
+
+    if not user_confirmed:
+        response = {
+            "status": "cancelled",
+            "message": "Resume generation cancelled.",
+        }
+        print(response["message"])
+        return response
+
     job_analyses_response = list_job_analyses()
 
     print()
-    print(format_job_analyses_response(job_analyses_response))
+    print(format_job_analyses_summary_response(job_analyses_response))
 
     if job_analyses_response.get("status") != "success":
         return job_analyses_response
@@ -151,6 +198,22 @@ def run_resume_generation_flow() -> dict:
         print(response["message"])
         return response
 
+    job_confirmed = _confirm_selected_job(selected_job)
+
+    if job_confirmed is None:
+        response = cancelled_response()
+        print(response["message"])
+        return response
+
+    if not job_confirmed:
+        response = {
+            "status": "cancelled",
+            "message": "Resume generation cancelled.",
+        }
+        print(response["message"])
+        return response
+
+    print()
     save_choice = input_or_back("Save generated materials? (y/n): ")
 
     if save_choice is None:
@@ -172,6 +235,7 @@ def run_resume_generation_flow() -> dict:
     if response.get("status") != "success":
         return response
 
+    print()
     export_choice = input_or_back("Export generated materials to .docx? (y/n): ")
 
     if export_choice is None:

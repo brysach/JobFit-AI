@@ -54,6 +54,7 @@ def sample_job_analyses_response() -> dict:
             {
                 "row_number": 2,
                 "application_id": 20,
+                "company_name": "TechStart",
                 "job_title": "Software Engineering Intern",
                 "required_skills": ["Python", "Git"],
                 "keywords": ["Python", "teamwork"],
@@ -61,6 +62,7 @@ def sample_job_analyses_response() -> dict:
             {
                 "row_number": 3,
                 "application_id": 21,
+                "company_name": "DataWorks",
                 "job_title": "Data Analyst Intern",
                 "required_skills": ["SQL", "Excel"],
                 "keywords": ["data", "dashboard"],
@@ -105,7 +107,9 @@ def test_run_resume_generation_flow(monkeypatch):
     inputs = iter(
         [
             "1",
+            "y",
             "2",
+            "y",
             "y",
             "n",
         ]
@@ -155,6 +159,81 @@ def test_run_resume_generation_flow(monkeypatch):
     assert captured_call["save"] is True
 
 
+def test_run_resume_generation_flow_user_selection_not_confirmed(monkeypatch):
+    inputs = iter(["1", "n"])
+    generate_was_called = False
+
+    def fake_input(prompt: str = "") -> str:
+        return next(inputs)
+
+    def fake_generate_materials_for_saved_records(
+        user_id: int | str,
+        application_id: int | str,
+        save: bool = False,
+    ) -> dict:
+        nonlocal generate_was_called
+        generate_was_called = True
+        return sample_success_response()
+
+    monkeypatch.setattr(builtins, "input", fake_input)
+    monkeypatch.setattr(
+        materials_cli,
+        "list_user_profiles",
+        lambda: sample_user_profiles_response(),
+    )
+    monkeypatch.setattr(
+        materials_cli,
+        "generate_materials_for_saved_records",
+        fake_generate_materials_for_saved_records,
+    )
+
+    result = materials_cli.run_resume_generation_flow()
+
+    assert result["status"] == "cancelled"
+    assert result["message"] == "Resume generation cancelled."
+    assert generate_was_called is False
+
+
+def test_run_resume_generation_flow_job_selection_not_confirmed(monkeypatch):
+    inputs = iter(["1", "y", "2", "n"])
+    generate_was_called = False
+
+    def fake_input(prompt: str = "") -> str:
+        return next(inputs)
+
+    def fake_generate_materials_for_saved_records(
+        user_id: int | str,
+        application_id: int | str,
+        save: bool = False,
+    ) -> dict:
+        nonlocal generate_was_called
+        generate_was_called = True
+        return sample_success_response()
+
+    monkeypatch.setattr(builtins, "input", fake_input)
+    monkeypatch.setattr(
+        materials_cli,
+        "list_user_profiles",
+        lambda: sample_user_profiles_response(),
+    )
+    monkeypatch.setattr(
+        materials_cli,
+        "list_job_analyses",
+        lambda: sample_job_analyses_response(),
+    )
+    monkeypatch.setattr(
+        materials_cli,
+        "generate_materials_for_saved_records",
+        fake_generate_materials_for_saved_records,
+    )
+
+    result = materials_cli.run_resume_generation_flow()
+
+    assert result["status"] == "cancelled"
+    assert result["message"] == "Resume generation cancelled."
+    assert generate_was_called is False
+
+
 def test_run_resume_generation_flow_back_from_user_selection(monkeypatch):
     inputs = iter(["BACK"])
     generate_was_called = False
@@ -190,8 +269,43 @@ def test_run_resume_generation_flow_back_from_user_selection(monkeypatch):
     assert generate_was_called is False
 
 
-def test_run_resume_generation_flow_back_from_job_selection(monkeypatch):
+def test_run_resume_generation_flow_back_from_user_confirmation(monkeypatch):
     inputs = iter(["1", "BACK"])
+    generate_was_called = False
+
+    def fake_input(prompt: str = "") -> str:
+        return next(inputs)
+
+    def fake_generate_materials_for_saved_records(
+        user_id: int | str,
+        application_id: int | str,
+        save: bool = False,
+    ) -> dict:
+        nonlocal generate_was_called
+        generate_was_called = True
+        return sample_success_response()
+
+    monkeypatch.setattr(builtins, "input", fake_input)
+    monkeypatch.setattr(
+        materials_cli,
+        "list_user_profiles",
+        lambda: sample_user_profiles_response(),
+    )
+    monkeypatch.setattr(
+        materials_cli,
+        "generate_materials_for_saved_records",
+        fake_generate_materials_for_saved_records,
+    )
+
+    result = materials_cli.run_resume_generation_flow()
+
+    assert result["status"] == "cancelled"
+    assert result["message"] == "Returned to main menu."
+    assert generate_was_called is False
+
+
+def test_run_resume_generation_flow_back_from_job_selection(monkeypatch):
+    inputs = iter(["1", "y", "BACK"])
     generate_was_called = False
 
     def fake_input(prompt: str = "") -> str:
@@ -266,7 +380,7 @@ def test_run_resume_generation_flow_invalid_user_selection(monkeypatch):
 
 
 def test_run_resume_generation_flow_invalid_job_selection(monkeypatch):
-    inputs = iter(["1", "99"])
+    inputs = iter(["1", "y", "99"])
     generate_was_called = False
 
     def fake_input(prompt: str = "") -> str:
@@ -322,7 +436,7 @@ def test_run_resume_generation_flow_no_user_profiles(monkeypatch):
 
 
 def test_run_resume_generation_flow_no_job_analyses(monkeypatch):
-    inputs = iter(["1"])
+    inputs = iter(["1", "y"])
 
     def fake_input(prompt: str = "") -> str:
         return next(inputs)
