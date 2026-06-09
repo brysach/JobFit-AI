@@ -35,19 +35,13 @@ def _read_multiline_items() -> list[str]:
 
     return items
 
-
 def format_user_profile_response(response: dict) -> str:
     """Format a user profile engine response for display."""
 
     status = response.get("status")
 
     if status == "success":
-        lines = ["User profile saved successfully."]
-
-        if "user_id" in response:
-            lines.append(f"User ID: {response['user_id']}")
-
-        return "\n".join(lines)
+        return "User profile saved successfully."
 
     return response.get("message", "Something went wrong.")
 

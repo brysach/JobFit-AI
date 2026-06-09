@@ -24,7 +24,7 @@ def test_format_user_profile_response_success():
 
     output = user_profile_cli.format_user_profile_response(response)
 
-    assert output == "User profile saved successfully.\nUser ID: 1"
+    assert output == "User profile saved successfully."
 
 
 def test_format_user_profile_response_error():

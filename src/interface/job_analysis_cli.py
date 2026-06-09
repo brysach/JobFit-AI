@@ -50,9 +50,6 @@ def format_analysis_response(response: dict) -> str:
         lines.append("")
         lines.append(f"Save Status: {response['save_status']}")
 
-    if "application_id" in response:
-        lines.append(f"Application ID: {response['application_id']}")
-
     return "\n".join(lines)
 
 

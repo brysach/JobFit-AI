@@ -6,6 +6,8 @@ import json
 
 from src.engine.gemini_client import call_gemini
 from src.storage.job_analysis_storage import save_job_analysis
+from src.storage.job_analysis_storage import delete_job_analysis_by_row
+from src.storage.job_analysis_storage import list_job_analyses as list_job_analysis_records
 
 REQUIRED_ANALYSIS_KEYS = {
     "job_title",
@@ -141,17 +143,12 @@ def analyze_job_description(job_description: str) -> dict:
         "data": data,
     }
 
-
 def analyze_and_optionally_save(
     job_description: str,
     application_id: int | str | None = None,
     save: bool = False,
 ) -> dict:
-    """Analyze a job description and optionally save the result.
-
-    application_id is accepted for backward compatibility, but new IDs
-    are generated automatically by the storage layer.
-    """
+    """Analyze a job description and optionally save the result."""
 
     response = analyze_job_description(job_description)
 
@@ -177,3 +174,56 @@ def analyze_and_optionally_save(
         response["application_id"] = save_response.get("application_id")
 
     return response
+
+def list_job_analyses() -> dict:
+    """Return all saved job analyses."""
+
+    return list_job_analysis_records()
+
+
+def delete_job_analysis_by_index(entry_number: int | str) -> dict:
+    """Delete a saved job analysis by the displayed list number."""
+
+    try:
+        selected_index = int(entry_number)
+    except ValueError:
+        return {
+            "status": "invalid_selection",
+            "message": "Please choose a valid entry number.",
+        }
+
+    response = list_job_analysis_records()
+
+    if response.get("status") != "success":
+        return {
+            "status": "storage_error",
+            "message": "Could not retrieve job analyses.",
+        }
+
+    entries = response.get("data", [])
+
+    if not entries:
+        return {
+            "status": "not_found",
+            "message": "No job analyses were found.",
+        }
+
+    if selected_index < 1 or selected_index > len(entries):
+        return {
+            "status": "invalid_selection",
+            "message": "Please choose a valid entry number.",
+        }
+
+    row_number = entries[selected_index - 1]["row_number"]
+    delete_response = delete_job_analysis_by_row(row_number)
+
+    if delete_response.get("status") == "success":
+        return {
+            "status": "success",
+            "message": "Job analysis deleted successfully.",
+        }
+
+    return {
+        "status": "storage_error",
+        "message": "Could not delete job analysis.",
+    }
