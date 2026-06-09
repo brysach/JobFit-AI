@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from src.engine.job_analysis import analyze_job_description
 from src.engine.job_analysis import save_existing_job_analysis
+from src.interface.input_utils import cancelled_response
+from src.interface.input_utils import input_or_back
+from src.interface.input_utils import is_back_command
+from src.interface.input_utils import print_back_instruction
 
 
 def _format_list(title: str, items: list[str]) -> list[str]:
@@ -54,15 +58,23 @@ def format_analysis_response(response: dict) -> str:
     return "\n".join(lines)
 
 
-def _read_multiline_input() -> str:
-    """Read multiline user input until the user types END."""
+def _read_multiline_input() -> str | None:
+    """Read multiline user input until the user types END.
+
+    Return None if the user chooses to go back.
+    """
 
     lines = []
 
     while True:
         line = input()
+
+        if is_back_command(line):
+            return None
+
         if line.strip().upper() == "END":
             break
+
         lines.append(line)
 
     return "\n".join(lines)
@@ -75,15 +87,26 @@ def run_job_analysis_flow() -> dict:
         print()
         print("Job Description Analysis")
         print("========================")
+        print_back_instruction()
         print("Paste a job description below.")
         print("When finished, type END on its own line.")
         print()
 
         job_description = _read_multiline_input()
 
-        generate_choice = input("Generate job analysis? (y/n): ").strip().lower()
+        if job_description is None:
+            response = cancelled_response()
+            print(response["message"])
+            return response
 
-        if generate_choice != "y":
+        generate_choice = input_or_back("Generate job analysis? (y/n): ")
+
+        if generate_choice is None:
+            response = cancelled_response()
+            print(response["message"])
+            return response
+
+        if generate_choice.strip().lower() != "y":
             print("Job analysis was not generated. Paste a new job description.")
             continue
 
@@ -95,9 +118,14 @@ def run_job_analysis_flow() -> dict:
         if response.get("status") != "success":
             return response
 
-        save_choice = input("Save this job analysis? (y/n): ").strip().lower()
+        save_choice = input_or_back("Save this job analysis? (y/n): ")
 
-        if save_choice == "y":
+        if save_choice is None:
+            cancelled = cancelled_response()
+            print(cancelled["message"])
+            return cancelled
+
+        if save_choice.strip().lower() == "y":
             save_response = save_existing_job_analysis(response["data"])
 
             if save_response.get("status") == "success":

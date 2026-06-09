@@ -95,3 +95,35 @@ def test_run_resume_generation_flow(monkeypatch):
     assert captured_call["user_id"] == "1"
     assert captured_call["application_id"] == "1"
     assert captured_call["save"] is True
+
+def test_run_resume_generation_flow_back_from_user_id(monkeypatch):
+    inputs = iter(["BACK"])
+    generate_was_called = False
+
+    def fake_input(prompt: str = "") -> str:
+        return next(inputs)
+
+    def fake_generate_materials_for_saved_records(
+        user_id: int | str,
+        application_id: int | str,
+        save: bool = False,
+    ) -> dict:
+        nonlocal generate_was_called
+        generate_was_called = True
+        return {
+            "status": "success",
+            "data": {},
+        }
+
+    monkeypatch.setattr(builtins, "input", fake_input)
+    monkeypatch.setattr(
+        materials_cli,
+        "generate_materials_for_saved_records",
+        fake_generate_materials_for_saved_records,
+    )
+
+    result = materials_cli.run_resume_generation_flow()
+
+    assert result["status"] == "cancelled"
+    assert result["message"] == "Returned to main menu."
+    assert generate_was_called is False

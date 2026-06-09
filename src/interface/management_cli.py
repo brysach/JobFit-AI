@@ -6,6 +6,9 @@ from src.engine.job_analysis import delete_job_analysis_by_index
 from src.engine.job_analysis import list_job_analyses
 from src.engine.user_profile import delete_user_profile_by_index
 from src.engine.user_profile import list_user_profiles
+from src.interface.input_utils import cancelled_response
+from src.interface.input_utils import input_or_back
+from src.interface.input_utils import print_back_instruction
 
 
 def _format_list(title: str, items: list[str]) -> list[str]:
@@ -92,6 +95,9 @@ def format_job_analyses_response(response: dict) -> str:
 def run_manage_users_flow() -> dict:
     """Show saved users and let the user delete one by list number."""
 
+    print()
+    print_back_instruction()
+
     response = list_user_profiles()
 
     print()
@@ -102,13 +108,12 @@ def run_manage_users_flow() -> dict:
 
     print()
     print("Choose the entry number you want to delete.")
-    selection = input("Entry number to delete, or press Enter to cancel: ").strip()
+    selection = input_or_back("Entry number to delete: ")
 
-    if selection == "":
-        return {
-            "status": "cancelled",
-            "message": "Delete cancelled.",
-        }
+    if selection is None:
+        cancelled = cancelled_response()
+        print(cancelled["message"])
+        return cancelled
 
     delete_response = delete_user_profile_by_index(selection)
 
@@ -120,6 +125,9 @@ def run_manage_users_flow() -> dict:
 def run_manage_jobs_flow() -> dict:
     """Show saved jobs and let the user delete one by list number."""
 
+    print()
+    print_back_instruction()
+
     response = list_job_analyses()
 
     print()
@@ -130,13 +138,12 @@ def run_manage_jobs_flow() -> dict:
 
     print()
     print("Choose the entry number you want to delete.")
-    selection = input("Entry number to delete, or press Enter to cancel: ").strip()
+    selection = input_or_back("Entry number to delete: ")
 
-    if selection == "":
-        return {
-            "status": "cancelled",
-            "message": "Delete cancelled.",
-        }
+    if selection is None:
+        cancelled = cancelled_response()
+        print(cancelled["message"])
+        return cancelled
 
     delete_response = delete_job_analysis_by_index(selection)
 

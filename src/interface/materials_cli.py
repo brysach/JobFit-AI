@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from src.engine.materials import generate_materials_for_saved_records
 from src.export.resume_docx import export_materials_to_docx
+from src.interface.input_utils import cancelled_response
+from src.interface.input_utils import input_or_back
+from src.interface.input_utils import print_back_instruction
 
 
 def _format_list(title: str, items: list[str]) -> list[str]:
@@ -57,12 +60,35 @@ def run_resume_generation_flow() -> dict:
     print()
     print("Resume and Cover Letter Generation")
     print("==================================")
+    print_back_instruction()
+    print()
 
-    user_id = input("Enter user ID: ").strip()
-    application_id = input("Enter application ID: ").strip()
+    user_id = input_or_back("Enter user ID: ")
 
-    save_choice = input("Save generated materials? (y/n): ").strip().lower()
-    should_save = save_choice == "y"
+    if user_id is None:
+        response = cancelled_response()
+        print(response["message"])
+        return response
+
+    user_id = user_id.strip()
+
+    application_id = input_or_back("Enter application ID: ")
+
+    if application_id is None:
+        response = cancelled_response()
+        print(response["message"])
+        return response
+
+    application_id = application_id.strip()
+
+    save_choice = input_or_back("Save generated materials? (y/n): ")
+
+    if save_choice is None:
+        response = cancelled_response()
+        print(response["message"])
+        return response
+
+    should_save = save_choice.strip().lower() == "y"
 
     response = generate_materials_for_saved_records(
         user_id=user_id,
@@ -72,20 +98,29 @@ def run_resume_generation_flow() -> dict:
 
     print()
     print(format_materials_response(response))
-    if response.get("status") == "success":
-        export_choice = input("Export generated materials to .docx? (y/n): ").strip().lower()
 
-        if export_choice == "y":
-            filename = f"resume_materials_user_{user_id}_application_{application_id}.docx"
-            try:
-                file_path = export_materials_to_docx(
-                    response["data"],
-                    filename=filename,
-                )
-                print(f"File saved to: {file_path}")
-            except PermissionError:
-                print("Could not export the .docx file because the file may already be open.")
-            except Exception:
-                print("Could not export the .docx file.")
+    if response.get("status") != "success":
+        return response
+
+    export_choice = input_or_back("Export generated materials to .docx? (y/n): ")
+
+    if export_choice is None:
+        cancelled = cancelled_response()
+        print(cancelled["message"])
+        return response
+
+    if export_choice.strip().lower() == "y":
+        filename = f"resume_materials_user_{user_id}_application_{application_id}.docx"
+
+        try:
+            file_path = export_materials_to_docx(
+                response["data"],
+                filename=filename,
+            )
+            print(f"File saved to: {file_path}")
+        except PermissionError:
+            print("Could not export the .docx file because the file may already be open.")
+        except Exception:
+            print("Could not export the .docx file.")
 
     return response
