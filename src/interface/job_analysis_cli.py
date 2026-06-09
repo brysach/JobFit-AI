@@ -36,6 +36,7 @@ def format_analysis_response(response: dict) -> str:
     lines = [
         "Job Analysis",
         "============",
+        f"Company: {data.get('company_name', 'Unknown')}",
         f"Job Title: {data.get('job_title', 'Unknown')}",
         "",
     ]

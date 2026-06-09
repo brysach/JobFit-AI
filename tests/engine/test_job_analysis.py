@@ -22,6 +22,7 @@ def sample_job_description() -> str:
 def sample_gemini_response() -> str:
     return json.dumps(
         {
+            "company_name": "TechStart",
             "job_title": "Software Engineering Intern",
             "required_skills": ["Python", "Git"],
             "preferred_skills": ["React"],
@@ -151,6 +152,7 @@ def test_analyze_and_save_success(monkeypatch):
     assert result["application_id"] == 1
 
     assert "application_id" not in saved_record
+    assert saved_record["company_name"] == "TechStart"
     assert saved_record["job_title"] == "Software Engineering Intern"
     assert saved_record["required_skills"] == ["Python", "Git"]
     assert saved_record["keywords"] == ["Python", "Git", "teamwork"]
@@ -172,6 +174,7 @@ def test_save_existing_job_analysis_success(monkeypatch):
     )
 
     analysis_data = {
+        "company_name": "TechStart",
         "job_title": "Software Engineering Intern",
         "required_skills": ["Python", "Git"],
         "preferred_skills": ["React"],
@@ -184,6 +187,7 @@ def test_save_existing_job_analysis_success(monkeypatch):
     assert result["status"] == "success"
     assert result["save_status"] == "success"
     assert result["application_id"] == 1
+    assert saved_record["company_name"] == "TechStart"
     assert saved_record["job_title"] == "Software Engineering Intern"
     assert saved_record["required_skills"] == ["Python", "Git"]
     assert saved_record["keywords"] == ["Python", "Git", "teamwork"]
@@ -197,6 +201,7 @@ def test_save_existing_job_analysis_storage_error(monkeypatch):
     )
 
     analysis_data = {
+        "company_name": "TechStart",
         "job_title": "Software Engineering Intern",
         "required_skills": ["Python", "Git"],
         "keywords": ["Python", "Git", "teamwork"],

@@ -28,13 +28,14 @@ def sample_job_analyses_response() -> dict:
     return {
         "status": "success",
         "data": [
-            {
-                "row_number": 2,
-                "application_id": 1,
-                "job_title": "Software Engineering Intern",
-                "required_skills": ["Python", "Git"],
-                "keywords": ["Python", "teamwork"],
-            }
+                    {
+                        "row_number": 2,
+                        "application_id": 1,
+                        "company_name": "TechStart",
+                        "job_title": "Software Engineering Intern",
+                        "required_skills": ["Python", "Git"],
+                        "keywords": ["Python", "teamwork"],
+                    }
         ],
     }
 

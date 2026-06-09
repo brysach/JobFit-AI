@@ -8,6 +8,7 @@ from src.storage.job_analysis_storage import save_job_analysis
 
 def valid_job_analysis() -> dict:
     return {
+        "company_name": "TechStart",
         "job_title": "Software Engineering Intern",
         "required_skills": ["Python", "Git"],
         "keywords": ["Python", "Git", "teamwork"],
@@ -33,7 +34,7 @@ def test_save_job_analysis_generates_incrementing_ids():
 
 def test_missing_required_fields_error():
     job_analysis = valid_job_analysis()
-    del job_analysis["job_title"]
+    del job_analysis["company_name"]
 
     result = save_job_analysis(job_analysis)
 
@@ -47,6 +48,7 @@ def test_get_job_analysis_success():
     get_result = get_job_analysis(application_id)
 
     assert get_result["status"] == "success"
+    assert get_result["data"]["company_name"] == "TechStart"
     assert get_result["data"]["application_id"] == application_id
     assert get_result["data"]["job_title"] == "Software Engineering Intern"
     assert get_result["data"]["required_skills"] == ["Python", "Git"]

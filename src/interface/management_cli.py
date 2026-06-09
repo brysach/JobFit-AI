@@ -79,6 +79,7 @@ def format_job_analyses_response(response: dict) -> str:
     for index, job in enumerate(jobs, start=1):
         lines.append("")
         lines.append(f"{index}. {job.get('job_title', 'Unknown job')}")
+        lines.append(f"   Company: {job.get('company_name', 'Unknown')}")
 
         skills_lines = _format_list(
             "   Required Skills",
