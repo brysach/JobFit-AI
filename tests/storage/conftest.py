@@ -5,8 +5,8 @@ from __future__ import annotations
 import pytest
 
 import src.storage.job_analysis_storage as job_analysis_storage
-import src.storage.user_profile_storage as user_profile_storage
 import src.storage.materials_storage as materials_storage
+import src.storage.user_profile_storage as user_profile_storage
 
 
 class _InMemoryWorksheet:
@@ -14,7 +14,13 @@ class _InMemoryWorksheet:
         self._rows = [headers]
 
     def col_values(self, col: int) -> list[str]:
-        return [str(row[col - 1]) for row in self._rows if len(row) >= col]
+        values = []
+
+        for row in self._rows:
+            if len(row) >= col:
+                values.append(str(row[col - 1]))
+
+        return values
 
     def append_row(self, row: list) -> None:
         self._rows.append(row)
@@ -35,7 +41,7 @@ class _InMemoryWorksheet:
             records.append(record)
 
         return records
-    
+
     def delete_rows(self, row_number: int) -> None:
         row_index = row_number - 1
 
@@ -49,33 +55,87 @@ class _InMemoryWorksheet:
 def in_memory_worksheets(monkeypatch):
     worksheets = {
         "jobsAnalysis": _InMemoryWorksheet(
-            ["application_id", "company_name", "job_title", "required_skills", "keywords"]
+            [
+                "application_id",
+                "company_name",
+                "job_title",
+                "required_skills",
+                "keywords",
+            ]
         ),
         "usersProfile": _InMemoryWorksheet(
-            ["user_id", "name", "education", "skills", "projects", "experience"]
+            [
+                "user_id",
+                "name",
+                "email",
+                "phone_number",
+                "university",
+                "degree",
+                "skills",
+                "projects",
+                "experience",
+            ]
         ),
         "generatedMaterials": _InMemoryWorksheet(
-            ["application_id", "user_id", "resume_bullets", "cover_letter"]
+            [
+                "application_id",
+                "user_id",
+                "resume_skills",
+                "resume_projects",
+                "resume_experience",
+                "cover_letter",
+                "strengths",
+                "weaknesses",
+            ]
         ),
     }
 
-    def fake_get_worksheet(worksheet_name: str):
+    def fake_get_worksheet(worksheet_name: str | None = None):
+        if worksheet_name is None:
+            return worksheets["jobsAnalysis"]
+
         return worksheets[worksheet_name]
 
     monkeypatch.setattr(
         job_analysis_storage,
         "get_worksheet",
         fake_get_worksheet,
+        raising=False,
     )
 
     monkeypatch.setattr(
         user_profile_storage,
         "get_worksheet",
         fake_get_worksheet,
+        raising=False,
     )
 
     monkeypatch.setattr(
         materials_storage,
         "get_worksheet",
         fake_get_worksheet,
+        raising=False,
     )
+
+    monkeypatch.setattr(
+        job_analysis_storage,
+        "_get_job_analysis_worksheet",
+        lambda: worksheets["jobsAnalysis"],
+        raising=False,
+    )
+
+    monkeypatch.setattr(
+        user_profile_storage,
+        "_get_user_profile_worksheet",
+        lambda: worksheets["usersProfile"],
+        raising=False,
+    )
+
+    monkeypatch.setattr(
+        materials_storage,
+        "_get_generated_materials_worksheet",
+        lambda: worksheets["generatedMaterials"],
+        raising=False,
+    )
+
+    return worksheets

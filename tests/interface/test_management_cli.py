@@ -15,7 +15,10 @@ def sample_user_profiles_response() -> dict:
                 "row_number": 2,
                 "user_id": 1,
                 "name": "Bryan Estrada",
-                "education": "B.S. Computer Science student",
+                "email": "bryan@example.com",
+                "phone_number": "555-123-4567",
+                "university": "University of California, Riverside",
+                "degree": "B.S. Computer Science",
                 "skills": ["Python", "Git"],
                 "projects": ["JobFit-AI"],
                 "experience": ["Math tutor"],
@@ -46,7 +49,10 @@ def test_format_user_profiles_summary_response_success():
     )
 
     assert "Saved User Profiles" in output
-    assert "1. Bryan Estrada | B.S. Computer Science student" in output
+    assert (
+        "1. Bryan Estrada | University of California, Riverside | "
+        "B.S. Computer Science"
+    ) in output
     assert "- Python" not in output
     assert "- JobFit-AI" not in output
 
@@ -69,7 +75,10 @@ def test_format_user_profile_details():
 
     assert "Selected User Profile" in output
     assert "Name: Bryan Estrada" in output
-    assert "Education: B.S. Computer Science student" in output
+    assert "Email: bryan@example.com" in output
+    assert "Phone: 555-123-4567" in output
+    assert "University: University of California, Riverside" in output
+    assert "Degree: B.S. Computer Science" in output
     assert "- Python" in output
     assert "- Git" in output
     assert "- JobFit-AI" in output

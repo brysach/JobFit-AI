@@ -77,14 +77,41 @@ def run_user_profile_flow() -> dict:
 
     name = name.strip()
 
-    education = input_or_back("Enter your education: ")
+    email = input_or_back("Enter your email: ")
 
-    if education is None:
+    if email is None:
         response = cancelled_response()
         print(response["message"])
         return response
 
-    education = education.strip()
+    email = email.strip()
+
+    phone_number = input_or_back("Enter your phone number: ")
+
+    if phone_number is None:
+        response = cancelled_response()
+        print(response["message"])
+        return response
+
+    phone_number = phone_number.strip()
+
+    university = input_or_back("Enter your university: ")
+
+    if university is None:
+        response = cancelled_response()
+        print(response["message"])
+        return response
+
+    university = university.strip()
+
+    degree = input_or_back("Enter your degree: ")
+
+    if degree is None:
+        response = cancelled_response()
+        print(response["message"])
+        return response
+
+    degree = degree.strip()
 
     skills_text = input_or_back("Enter your skills separated by commas: ")
 
@@ -115,7 +142,10 @@ def run_user_profile_flow() -> dict:
 
     user_profile = {
         "name": name,
-        "education": education,
+        "email": email,
+        "phone_number": phone_number,
+        "university": university,
+        "degree": degree,
         "skills": skills,
         "projects": projects,
         "experience": experience,
