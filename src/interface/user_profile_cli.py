@@ -42,7 +42,12 @@ def format_user_profile_response(response: dict) -> str:
     status = response.get("status")
 
     if status == "success":
-        return "User profile saved successfully."
+        lines = ["User profile saved successfully."]
+
+        if "user_id" in response:
+            lines.append(f"User ID: {response['user_id']}")
+
+        return "\n".join(lines)
 
     return response.get("message", "Something went wrong.")
 
@@ -54,7 +59,6 @@ def run_user_profile_flow() -> dict:
     print("User Profile Management")
     print("=======================")
 
-    user_id = input("Enter user ID: ").strip()
     name = input("Enter your name: ").strip()
     education = input("Enter your education: ").strip()
 
@@ -70,7 +74,6 @@ def run_user_profile_flow() -> dict:
     experience = _read_multiline_items()
 
     user_profile = {
-        "user_id": user_id,
         "name": name,
         "education": education,
         "skills": skills,

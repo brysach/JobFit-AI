@@ -77,10 +77,15 @@ def run_resume_generation_flow() -> dict:
 
         if export_choice == "y":
             filename = f"resume_materials_user_{user_id}_application_{application_id}.docx"
-            file_path = export_materials_to_docx(
-                response["data"],
-                filename=filename,
-            )
-            print(f"File saved to: {file_path}")
+            try:
+                file_path = export_materials_to_docx(
+                    response["data"],
+                    filename=filename,
+                )
+                print(f"File saved to: {file_path}")
+            except PermissionError:
+                print("Could not export the .docx file because the file may already be open.")
+            except Exception:
+                print("Could not export the .docx file.")
 
     return response

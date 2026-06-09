@@ -6,11 +6,11 @@ from src.storage.google_sheets import get_worksheet
 
 
 REQUIRED_JOB_ANALYSIS_KEYS = {
-    "application_id",
     "job_title",
     "required_skills",
     "keywords",
 }
+
 
 def _comma_string_to_list(value: object) -> list[str]:
     """Convert a comma-separated string from Google Sheets into a list."""
@@ -28,37 +28,69 @@ def _comma_string_to_list(value: object) -> list[str]:
 
     return items
 
-def save_job_analysis(job_analysis: dict) -> str:
+
+def _parse_existing_id(value: object) -> int | None:
+    """Convert an existing sheet ID into an int if possible."""
+
+    text = str(value).strip().lstrip("'")
+
+    try:
+        return int(text)
+    except ValueError:
+        return None
+
+
+def _get_next_application_id(ws) -> int:
+    """Return the next application_id using max existing ID + 1."""
+
+    existing_ids = ws.col_values(1)
+    numeric_ids = []
+
+    for existing_id in existing_ids:
+        parsed_id = _parse_existing_id(existing_id)
+
+        if parsed_id is not None:
+            numeric_ids.append(parsed_id)
+
+    if not numeric_ids:
+        return 1
+
+    return max(numeric_ids) + 1
+
+
+def save_job_analysis(job_analysis: dict) -> dict:
     """Save analyzed job description data.
 
     Return:
-    - "success"
-    - "exists"
-    - "error"
+    - {"status": "success", "application_id": int}
+    - {"status": "error"}
     """
 
     if not all(key in job_analysis for key in REQUIRED_JOB_ANALYSIS_KEYS):
-        return "error"
+        return {"status": "error"}
 
     try:
         ws = get_worksheet("jobsAnalysis")
 
-        existing_ids = ws.col_values(1)
-        if str(job_analysis["application_id"]) in existing_ids:
-            return "exists"
+        application_id = _get_next_application_id(ws)
 
         row = [
-            job_analysis["application_id"],
+            application_id,
             job_analysis["job_title"],
             ", ".join(job_analysis["required_skills"]),
             ", ".join(job_analysis["keywords"]),
         ]
 
         ws.append_row(row)
-        return "success"
+
+        return {
+            "status": "success",
+            "application_id": application_id,
+        }
     except Exception:
-        return "error"
-    
+        return {"status": "error"}
+
+
 def get_job_analysis(application_id: int | str) -> dict:
     """Retrieve a saved job analysis by application_id."""
 

@@ -8,7 +8,6 @@ from src.storage.google_sheets import get_worksheet
 
 
 REQUIRED_USER_PROFILE_KEYS = {
-    "user_id",
     "name",
     "education",
     "skills",
@@ -40,27 +39,53 @@ def _json_to_list(value: object) -> list[str]:
     return [str(item) for item in data]
 
 
-def save_user_profile(user_profile: dict) -> str:
+def _parse_existing_id(value: object) -> int | None:
+    """Convert an existing sheet ID into an int if possible."""
+
+    text = str(value).strip().lstrip("'")
+
+    try:
+        return int(text)
+    except ValueError:
+        return None
+
+
+def _get_next_user_id(ws) -> int:
+    """Return the next user_id using max existing ID + 1."""
+
+    existing_ids = ws.col_values(1)
+    numeric_ids = []
+
+    for existing_id in existing_ids:
+        parsed_id = _parse_existing_id(existing_id)
+
+        if parsed_id is not None:
+            numeric_ids.append(parsed_id)
+
+    if not numeric_ids:
+        return 1
+
+    return max(numeric_ids) + 1
+
+
+def save_user_profile(user_profile: dict) -> dict:
     """Save user profile data.
 
     Return:
-    - "success"
-    - "exists"
-    - "error"
+    - {"status": "success", "user_id": int}
+    - {"status": "error"}
     """
 
     if not all(key in user_profile for key in REQUIRED_USER_PROFILE_KEYS):
-        return "error"
+        return {"status": "error"}
 
     try:
         ws = get_worksheet("usersProfile")
 
-        existing_ids = ws.col_values(1)
-        if str(user_profile["user_id"]) in existing_ids:
-            return "exists"
+        user_id = _get_next_user_id(ws)
 
         row = [
-            user_profile["user_id"],
+            user_id,
             user_profile["name"],
             user_profile["education"],
             _list_to_json(user_profile["skills"]),
@@ -69,9 +94,13 @@ def save_user_profile(user_profile: dict) -> str:
         ]
 
         ws.append_row(row)
-        return "success"
+
+        return {
+            "status": "success",
+            "user_id": user_id,
+        }
     except Exception:
-        return "error"
+        return {"status": "error"}
 
 
 def get_user_profile(user_id: int | str) -> dict:
