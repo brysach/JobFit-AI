@@ -137,3 +137,31 @@ def test_run_job_analysis_flow_regenerates_input_when_user_says_no(monkeypatch):
 
     assert result["status"] == "success"
     assert analyzed_descriptions == ["Second job description"]
+
+def test_run_job_analysis_flow_back_from_job_description(monkeypatch):
+    inputs = iter(["BACK"])
+    analyze_was_called = False
+
+    def fake_input(prompt: str = "") -> str:
+        return next(inputs)
+
+    def fake_analyze_job_description(job_description: str) -> dict:
+        nonlocal analyze_was_called
+        analyze_was_called = True
+        return {
+            "status": "success",
+            "data": {},
+        }
+
+    monkeypatch.setattr(builtins, "input", fake_input)
+    monkeypatch.setattr(
+        job_analysis_cli,
+        "analyze_job_description",
+        fake_analyze_job_description,
+    )
+
+    result = job_analysis_cli.run_job_analysis_flow()
+
+    assert result["status"] == "cancelled"
+    assert result["message"] == "Returned to main menu."
+    assert analyze_was_called is False

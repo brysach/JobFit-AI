@@ -132,3 +132,31 @@ def test_run_user_profile_flow_cancelled(monkeypatch):
     assert result["status"] == "cancelled"
     assert result["message"] == "User profile was not saved."
     assert save_was_called is False
+
+def test_run_user_profile_flow_back_from_name_prompt(monkeypatch):
+    inputs = iter(["BACK"])
+    save_was_called = False
+
+    def fake_input(prompt: str = "") -> str:
+        return next(inputs)
+
+    def fake_save_user_profile(user_profile: dict) -> dict:
+        nonlocal save_was_called
+        save_was_called = True
+        return {
+            "status": "success",
+            "save_status": "success",
+        }
+
+    monkeypatch.setattr(builtins, "input", fake_input)
+    monkeypatch.setattr(
+        user_profile_cli,
+        "save_user_profile",
+        fake_save_user_profile,
+    )
+
+    result = user_profile_cli.run_user_profile_flow()
+
+    assert result["status"] == "cancelled"
+    assert result["message"] == "Returned to main menu."
+    assert save_was_called is False

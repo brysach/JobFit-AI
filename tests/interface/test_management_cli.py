@@ -119,11 +119,20 @@ def test_run_manage_users_flow_delete_success(monkeypatch):
     assert captured_selection["selection"] == "1"
 
 
-def test_run_manage_users_flow_cancel(monkeypatch):
-    inputs = iter([""])
+def test_run_manage_users_flow_back_from_delete_prompt(monkeypatch):
+    inputs = iter(["BACK"])
+    delete_was_called = False
 
     def fake_input(prompt: str = "") -> str:
         return next(inputs)
+
+    def fake_delete_user_profile_by_index(selection: str) -> dict:
+        nonlocal delete_was_called
+        delete_was_called = True
+        return {
+            "status": "success",
+            "message": "User profile deleted successfully.",
+        }
 
     monkeypatch.setattr(builtins, "input", fake_input)
     monkeypatch.setattr(
@@ -131,11 +140,50 @@ def test_run_manage_users_flow_cancel(monkeypatch):
         "list_user_profiles",
         lambda: sample_user_profiles_response(),
     )
+    monkeypatch.setattr(
+        management_cli,
+        "delete_user_profile_by_index",
+        fake_delete_user_profile_by_index,
+    )
 
     result = management_cli.run_manage_users_flow()
 
     assert result["status"] == "cancelled"
-    assert result["message"] == "Delete cancelled."
+    assert result["message"] == "Returned to main menu."
+    assert delete_was_called is False
+
+
+def test_run_manage_users_flow_empty_input_is_invalid_selection(monkeypatch):
+    inputs = iter([""])
+    captured_selection = {}
+
+    def fake_input(prompt: str = "") -> str:
+        return next(inputs)
+
+    def fake_delete_user_profile_by_index(selection: str) -> dict:
+        captured_selection["selection"] = selection
+        return {
+            "status": "invalid_selection",
+            "message": "Please choose a valid entry number.",
+        }
+
+    monkeypatch.setattr(builtins, "input", fake_input)
+    monkeypatch.setattr(
+        management_cli,
+        "list_user_profiles",
+        lambda: sample_user_profiles_response(),
+    )
+    monkeypatch.setattr(
+        management_cli,
+        "delete_user_profile_by_index",
+        fake_delete_user_profile_by_index,
+    )
+
+    result = management_cli.run_manage_users_flow()
+
+    assert result["status"] == "invalid_selection"
+    assert result["message"] == "Please choose a valid entry number."
+    assert captured_selection["selection"] == ""
 
 
 def test_run_manage_jobs_flow_delete_success(monkeypatch):
@@ -170,11 +218,20 @@ def test_run_manage_jobs_flow_delete_success(monkeypatch):
     assert captured_selection["selection"] == "1"
 
 
-def test_run_manage_jobs_flow_cancel(monkeypatch):
-    inputs = iter([""])
+def test_run_manage_jobs_flow_back_from_delete_prompt(monkeypatch):
+    inputs = iter(["BACK"])
+    delete_was_called = False
 
     def fake_input(prompt: str = "") -> str:
         return next(inputs)
+
+    def fake_delete_job_analysis_by_index(selection: str) -> dict:
+        nonlocal delete_was_called
+        delete_was_called = True
+        return {
+            "status": "success",
+            "message": "Job analysis deleted successfully.",
+        }
 
     monkeypatch.setattr(builtins, "input", fake_input)
     monkeypatch.setattr(
@@ -182,8 +239,47 @@ def test_run_manage_jobs_flow_cancel(monkeypatch):
         "list_job_analyses",
         lambda: sample_job_analyses_response(),
     )
+    monkeypatch.setattr(
+        management_cli,
+        "delete_job_analysis_by_index",
+        fake_delete_job_analysis_by_index,
+    )
 
     result = management_cli.run_manage_jobs_flow()
 
     assert result["status"] == "cancelled"
-    assert result["message"] == "Delete cancelled."
+    assert result["message"] == "Returned to main menu."
+    assert delete_was_called is False
+
+
+def test_run_manage_jobs_flow_empty_input_is_invalid_selection(monkeypatch):
+    inputs = iter([""])
+    captured_selection = {}
+
+    def fake_input(prompt: str = "") -> str:
+        return next(inputs)
+
+    def fake_delete_job_analysis_by_index(selection: str) -> dict:
+        captured_selection["selection"] = selection
+        return {
+            "status": "invalid_selection",
+            "message": "Please choose a valid entry number.",
+        }
+
+    monkeypatch.setattr(builtins, "input", fake_input)
+    monkeypatch.setattr(
+        management_cli,
+        "list_job_analyses",
+        lambda: sample_job_analyses_response(),
+    )
+    monkeypatch.setattr(
+        management_cli,
+        "delete_job_analysis_by_index",
+        fake_delete_job_analysis_by_index,
+    )
+
+    result = management_cli.run_manage_jobs_flow()
+
+    assert result["status"] == "invalid_selection"
+    assert result["message"] == "Please choose a valid entry number."
+    assert captured_selection["selection"] == ""
