@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.export.resume_docx</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.export.html" class="white">export</a>.resume_docx</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cexport%5Cresume_docx.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\export\resume_docx.py</a></td></tr></table>
+    <p><span class="code">DOCX&nbsp;export&nbsp;layer&nbsp;for&nbsp;generated&nbsp;application&nbsp;materials.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;-&gt;&nbsp;export<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;converts&nbsp;generated&nbsp;application&nbsp;materials&nbsp;into&nbsp;a&nbsp;formatted<br>
+.docx&nbsp;file.&nbsp;The&nbsp;exported&nbsp;document&nbsp;includes&nbsp;a&nbsp;resume&nbsp;page,&nbsp;a&nbsp;cover&nbsp;letter<br>
+page,&nbsp;and&nbsp;a&nbsp;strengths&nbsp;and&nbsp;weaknesses&nbsp;page.<br>
+&nbsp;<br>
+The&nbsp;resume&nbsp;page&nbsp;uses&nbsp;the&nbsp;user's&nbsp;profile&nbsp;information&nbsp;for&nbsp;the&nbsp;header&nbsp;and<br>
+education&nbsp;section,&nbsp;and&nbsp;uses&nbsp;generated&nbsp;materials&nbsp;for&nbsp;the&nbsp;tailored&nbsp;skills,<br>
+projects,&nbsp;and&nbsp;experience&nbsp;sections.<br>
+&nbsp;<br>
+The&nbsp;exported&nbsp;file&nbsp;uses:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Garamond&nbsp;font.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;A&nbsp;centered&nbsp;name&nbsp;header.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;A&nbsp;centered&nbsp;contact&nbsp;line.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Section&nbsp;headings&nbsp;for&nbsp;education,&nbsp;skills,&nbsp;projects,&nbsp;and&nbsp;experience.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Separator&nbsp;lines&nbsp;between&nbsp;major&nbsp;resume&nbsp;sections.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Separate&nbsp;pages&nbsp;for&nbsp;the&nbsp;cover&nbsp;letter&nbsp;and&nbsp;strengths/weaknesses.<br>
+&nbsp;<br>
+Error&nbsp;contract:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;module&nbsp;raises&nbsp;exceptions&nbsp;instead&nbsp;of&nbsp;returning&nbsp;status&nbsp;dictionaries<br>
+&nbsp;&nbsp;&nbsp;&nbsp;because&nbsp;it&nbsp;is&nbsp;an&nbsp;export&nbsp;helper.&nbsp;The&nbsp;interface&nbsp;layer&nbsp;catches&nbsp;these<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exceptions&nbsp;and&nbsp;displays&nbsp;user-facing&nbsp;export&nbsp;messages.</span></p>
+<p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-export_materials_to_docx"><strong>export_materials_to_docx</strong></a>(
+    materials_data: dict,
+    user_profile: dict,
+    output_dir: str | Path = 'outputs',
+    filename: str | None = None
+) -&gt; str</dt><dd><span class="code">Export&nbsp;resume,&nbsp;cover&nbsp;letter,&nbsp;strengths,&nbsp;and&nbsp;weaknesses&nbsp;to&nbsp;one&nbsp;.docx&nbsp;file.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;materials_data&nbsp;(dict):&nbsp;Generated&nbsp;application&nbsp;materials.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Expected&nbsp;format:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"resume":&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"projects":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"experience":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"cover_letter":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"strengths":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"weaknesses":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_profile&nbsp;(dict):&nbsp;Saved&nbsp;user&nbsp;profile&nbsp;data&nbsp;used&nbsp;for&nbsp;the&nbsp;resume<br>
+&nbsp;&nbsp;&nbsp;&nbsp;header&nbsp;and&nbsp;education&nbsp;section.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Expected&nbsp;format:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"email":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"phone_number":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"university":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"degree":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;output_dir&nbsp;(str&nbsp;|&nbsp;Path):&nbsp;Folder&nbsp;where&nbsp;the&nbsp;.docx&nbsp;file&nbsp;should&nbsp;be&nbsp;saved.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Defaults&nbsp;to&nbsp;"outputs".<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str&nbsp;|&nbsp;None):&nbsp;Optional&nbsp;file&nbsp;name.&nbsp;If&nbsp;None,&nbsp;the&nbsp;function&nbsp;uses<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"application_materials.docx".<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;Path&nbsp;to&nbsp;the&nbsp;saved&nbsp;.docx&nbsp;file.<br>
+&nbsp;<br>
+Raises:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;If&nbsp;materials_data&nbsp;is&nbsp;missing&nbsp;required&nbsp;fields.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ValueError:&nbsp;If&nbsp;user_profile&nbsp;is&nbsp;missing&nbsp;required&nbsp;fields.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;PermissionError:&nbsp;If&nbsp;the&nbsp;file&nbsp;cannot&nbsp;be&nbsp;written&nbsp;because&nbsp;it&nbsp;is&nbsp;open&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;blocked&nbsp;by&nbsp;the&nbsp;operating&nbsp;system.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Exception:&nbsp;If&nbsp;python-docx&nbsp;cannot&nbsp;create&nbsp;or&nbsp;save&nbsp;the&nbsp;file&nbsp;for&nbsp;another<br>
+&nbsp;&nbsp;&nbsp;&nbsp;reason.</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>FONT_NAME</strong> = 'Garamond'<br>
+<strong>SEPARATOR_WEIGHT_EIGHTHS_OF_POINT</strong> = '18'</td></tr></table>
+</body></html>

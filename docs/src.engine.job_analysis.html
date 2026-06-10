@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.engine.job_analysis</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.engine.html" class="white">engine</a>.job_analysis</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cengine%5Cjob_analysis.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\engine\job_analysis.py</a></td></tr></table>
+    <p><span class="code">Engine&nbsp;layer&nbsp;for&nbsp;analyzing&nbsp;job&nbsp;descriptions.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;-&gt;&nbsp;engine&nbsp;-&gt;&nbsp;storage<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;receives&nbsp;a&nbsp;raw&nbsp;job&nbsp;description&nbsp;from&nbsp;the&nbsp;interface&nbsp;layer,<br>
+uses&nbsp;Gemini&nbsp;to&nbsp;extract&nbsp;structured&nbsp;job&nbsp;information,&nbsp;validates&nbsp;the<br>
+generated&nbsp;response,&nbsp;and&nbsp;optionally&nbsp;sends&nbsp;the&nbsp;saved&nbsp;job&nbsp;analysis&nbsp;record<br>
+to&nbsp;the&nbsp;storage&nbsp;layer.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;does&nbsp;not&nbsp;read&nbsp;terminal&nbsp;input&nbsp;and&nbsp;does&nbsp;not&nbsp;directly&nbsp;format<br>
+terminal&nbsp;output.&nbsp;It&nbsp;returns&nbsp;response&nbsp;dictionaries&nbsp;with&nbsp;a&nbsp;"status"&nbsp;field<br>
+so&nbsp;the&nbsp;interface&nbsp;layer&nbsp;can&nbsp;decide&nbsp;what&nbsp;to&nbsp;display.<br>
+&nbsp;<br>
+Main&nbsp;status&nbsp;contract:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"success":&nbsp;The&nbsp;job&nbsp;description&nbsp;was&nbsp;analyzed&nbsp;or&nbsp;saved&nbsp;successfully.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"incomplete":&nbsp;The&nbsp;job&nbsp;description&nbsp;was&nbsp;empty.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"invalid_input":&nbsp;The&nbsp;input&nbsp;did&nbsp;not&nbsp;appear&nbsp;to&nbsp;describe&nbsp;a&nbsp;job.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"ai_error":&nbsp;Gemini&nbsp;failed&nbsp;or&nbsp;returned&nbsp;unusable&nbsp;output.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"storage_error":&nbsp;The&nbsp;job&nbsp;analysis&nbsp;could&nbsp;not&nbsp;be&nbsp;saved&nbsp;or&nbsp;deleted.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"not_found":&nbsp;No&nbsp;saved&nbsp;job&nbsp;analyses&nbsp;were&nbsp;found.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"invalid_selection":&nbsp;The&nbsp;user&nbsp;selected&nbsp;an&nbsp;invalid&nbsp;list&nbsp;entry.</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="json.html">json</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-analyze_and_optionally_save"><strong>analyze_and_optionally_save</strong></a>(
+    job_description: str,
+    application_id: int | str | None = None,
+    save: bool = False
+) -&gt; dict</dt><dd><span class="code">Analyze&nbsp;a&nbsp;job&nbsp;description&nbsp;and&nbsp;optionally&nbsp;save&nbsp;the&nbsp;result.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;job_description&nbsp;(str):&nbsp;Raw&nbsp;job&nbsp;posting&nbsp;text&nbsp;entered&nbsp;by&nbsp;the&nbsp;user.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;application_id&nbsp;(int&nbsp;|&nbsp;str&nbsp;|&nbsp;None):&nbsp;Optional&nbsp;application&nbsp;ID&nbsp;value.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;parameter&nbsp;is&nbsp;accepted&nbsp;for&nbsp;compatibility&nbsp;with&nbsp;the&nbsp;contract,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;new&nbsp;saved&nbsp;records&nbsp;generate&nbsp;their&nbsp;own&nbsp;ID&nbsp;in&nbsp;storage.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;save&nbsp;(bool):&nbsp;True&nbsp;if&nbsp;the&nbsp;analyzed&nbsp;job&nbsp;description&nbsp;should&nbsp;be&nbsp;saved;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;otherwise,&nbsp;False.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success&nbsp;without&nbsp;saving:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"data":&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"company_name":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"job_title":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"required_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"preferred_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"responsibilities":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"keywords":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success&nbsp;with&nbsp;saving:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"data":&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"company_name":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"job_title":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"required_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"preferred_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"responsibilities":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"keywords":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"save_status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"application_id":&nbsp;int,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Save&nbsp;failure&nbsp;after&nbsp;successful&nbsp;analysis:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"data":&nbsp;dict,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"save_status":&nbsp;"error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Analysis&nbsp;failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;the&nbsp;same&nbsp;failure&nbsp;payloads&nbsp;as&nbsp;<a href="#-analyze_job_description">analyze_job_description</a>().</span></dd></dl>
+ <dl><dt><a name="-analyze_job_description"><strong>analyze_job_description</strong></a>(job_description: str) -&gt; dict</dt><dd><span class="code">Analyze&nbsp;a&nbsp;job&nbsp;description&nbsp;and&nbsp;return&nbsp;structured&nbsp;job&nbsp;data.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;job_description&nbsp;(str):&nbsp;Raw&nbsp;job&nbsp;posting&nbsp;text&nbsp;entered&nbsp;by&nbsp;the&nbsp;user.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"data":&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"company_name":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"job_title":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"required_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"preferred_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"responsibilities":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"keywords":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"incomplete",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Job&nbsp;description&nbsp;is&nbsp;required.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"invalid_input",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Input&nbsp;does&nbsp;not&nbsp;appear&nbsp;to&nbsp;be&nbsp;a&nbsp;job&nbsp;description.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"ai_error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Could&nbsp;not&nbsp;analyze&nbsp;job&nbsp;description.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span></dd></dl>
+ <dl><dt><a name="-delete_job_analysis_by_index"><strong>delete_job_analysis_by_index</strong></a>(entry_number: int | str) -&gt; dict</dt><dd><span class="code">Delete&nbsp;a&nbsp;saved&nbsp;job&nbsp;analysis&nbsp;by&nbsp;the&nbsp;displayed&nbsp;list&nbsp;number.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;entry_number&nbsp;(int&nbsp;|&nbsp;str):&nbsp;The&nbsp;list&nbsp;number&nbsp;displayed&nbsp;to&nbsp;the&nbsp;user<br>
+&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;the&nbsp;interface&nbsp;layer.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Job&nbsp;analysis&nbsp;deleted&nbsp;successfully.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"invalid_selection",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Please&nbsp;choose&nbsp;a&nbsp;valid&nbsp;entry&nbsp;number.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"not_found",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"No&nbsp;job&nbsp;analyses&nbsp;were&nbsp;found.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"storage_error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Could&nbsp;not&nbsp;retrieve&nbsp;job&nbsp;analyses.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"storage_error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Could&nbsp;not&nbsp;delete&nbsp;job&nbsp;analysis.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span></dd></dl>
+ <dl><dt><a name="-list_job_analyses"><strong>list_job_analyses</strong></a>() -&gt; dict</dt><dd><span class="code">Return&nbsp;all&nbsp;saved&nbsp;job&nbsp;analyses.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;None.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;returned&nbsp;by&nbsp;the&nbsp;storage&nbsp;layer.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"data":&nbsp;[<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"row_number":&nbsp;int,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"application_id":&nbsp;int&nbsp;|&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"company_name":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"job_title":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"required_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"keywords":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"not_found",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"No&nbsp;job&nbsp;analyses&nbsp;were&nbsp;found.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span></dd></dl>
+ <dl><dt><a name="-save_existing_job_analysis"><strong>save_existing_job_analysis</strong></a>(analysis_data: dict) -&gt; dict</dt><dd><span class="code">Save&nbsp;an&nbsp;already&nbsp;generated&nbsp;job&nbsp;analysis.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;analysis_data&nbsp;(dict):&nbsp;Structured&nbsp;job&nbsp;analysis&nbsp;produced&nbsp;by<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#-analyze_job_description">analyze_job_description</a>().<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Expected&nbsp;format:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"company_name":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"job_title":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"required_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"preferred_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"responsibilities":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"keywords":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"save_status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"application_id":&nbsp;int,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"storage_error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Could&nbsp;not&nbsp;save&nbsp;job&nbsp;analysis.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>REQUIRED_ANALYSIS_KEYS</strong> = {'company_name', 'job_title', 'keywords', 'preferred_skills', 'required_skills', 'responsibilities'}</td></tr></table>
+</body></html>

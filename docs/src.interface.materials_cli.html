@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.interface.materials_cli</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.interface.html" class="white">interface</a>.materials_cli</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cinterface%5Cmaterials_cli.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\interface\materials_cli.py</a></td></tr></table>
+    <p><span class="code">Command-line&nbsp;flow&nbsp;for&nbsp;resume&nbsp;and&nbsp;cover&nbsp;letter&nbsp;generation.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;-&gt;&nbsp;engine&nbsp;-&gt;&nbsp;storage<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;-&gt;&nbsp;export<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;lets&nbsp;the&nbsp;user&nbsp;select&nbsp;a&nbsp;saved&nbsp;user&nbsp;profile&nbsp;and&nbsp;a&nbsp;saved&nbsp;job<br>
+analysis,&nbsp;confirms&nbsp;both&nbsp;selections,&nbsp;requests&nbsp;generated&nbsp;materials&nbsp;from<br>
+the&nbsp;engine&nbsp;layer,&nbsp;and&nbsp;optionally&nbsp;exports&nbsp;the&nbsp;generated&nbsp;content&nbsp;to&nbsp;a<br>
+.docx&nbsp;file.<br>
+&nbsp;<br>
+The&nbsp;module&nbsp;handles&nbsp;user&nbsp;prompts&nbsp;and&nbsp;formatted&nbsp;terminal&nbsp;output.&nbsp;It&nbsp;does<br>
+not&nbsp;call&nbsp;Gemini&nbsp;directly&nbsp;and&nbsp;does&nbsp;not&nbsp;access&nbsp;Google&nbsp;Sheets&nbsp;directly.<br>
+&nbsp;<br>
+Main&nbsp;status&nbsp;contract:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"success":&nbsp;Application&nbsp;materials&nbsp;were&nbsp;generated&nbsp;successfully.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"cancelled":&nbsp;The&nbsp;user&nbsp;returned&nbsp;to&nbsp;the&nbsp;main&nbsp;menu&nbsp;or&nbsp;cancelled&nbsp;generation.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"invalid_selection":&nbsp;The&nbsp;user&nbsp;selected&nbsp;an&nbsp;invalid&nbsp;list&nbsp;entry,&nbsp;or&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;selected&nbsp;record&nbsp;was&nbsp;missing&nbsp;a&nbsp;required&nbsp;backend&nbsp;ID.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"not_found":&nbsp;No&nbsp;saved&nbsp;user&nbsp;profiles&nbsp;or&nbsp;job&nbsp;analyses&nbsp;were&nbsp;found.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"incomplete_profile":&nbsp;The&nbsp;selected&nbsp;user&nbsp;profile&nbsp;was&nbsp;missing&nbsp;required&nbsp;data.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"missing_job_analysis":&nbsp;The&nbsp;selected&nbsp;job&nbsp;analysis&nbsp;was&nbsp;missing&nbsp;required&nbsp;data.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"ai_error":&nbsp;Gemini&nbsp;failed&nbsp;while&nbsp;generating&nbsp;materials.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"generation_failed":&nbsp;Gemini&nbsp;returned&nbsp;invalid&nbsp;or&nbsp;badly&nbsp;formatted&nbsp;output.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"error":&nbsp;The&nbsp;storage&nbsp;layer&nbsp;could&nbsp;not&nbsp;complete&nbsp;the&nbsp;requested&nbsp;operation.</span></p>
+<p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-format_materials_response"><strong>format_materials_response</strong></a>(response: dict) -&gt; str</dt><dd><span class="code">Format&nbsp;generated&nbsp;resume,&nbsp;cover&nbsp;letter,&nbsp;strengths,&nbsp;and&nbsp;weaknesses.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;response&nbsp;(dict):&nbsp;Response&nbsp;payload&nbsp;returned&nbsp;by<br>
+&nbsp;&nbsp;&nbsp;&nbsp;generate_materials_for_saved_records().<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;User-facing&nbsp;text&nbsp;for&nbsp;terminal&nbsp;display.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Possible&nbsp;return&nbsp;values:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;status&nbsp;is&nbsp;"success",&nbsp;returns&nbsp;formatted&nbsp;generated&nbsp;materials<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;these&nbsp;sections:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;resume&nbsp;skills<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;resume&nbsp;projects<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;resume&nbsp;experience<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;cover&nbsp;letter<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;strengths<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;weaknesses<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;optional&nbsp;save&nbsp;status<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;status&nbsp;is&nbsp;not&nbsp;"success",&nbsp;returns&nbsp;the&nbsp;response&nbsp;message&nbsp;if&nbsp;one<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists;&nbsp;otherwise,&nbsp;returns&nbsp;"Something&nbsp;went&nbsp;wrong.".</span></dd></dl>
+ <dl><dt><a name="-run_resume_generation_flow"><strong>run_resume_generation_flow</strong></a>() -&gt; dict</dt><dd><span class="code">Run&nbsp;the&nbsp;resume&nbsp;and&nbsp;cover&nbsp;letter&nbsp;generation&nbsp;option.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;None.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"data":&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"resume":&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"projects":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"experience":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"cover_letter":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"strengths":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"weaknesses":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success&nbsp;with&nbsp;saving:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"data":&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"resume":&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"projects":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"experience":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"cover_letter":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"strengths":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"weaknesses":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"save_status":&nbsp;"success"&nbsp;|&nbsp;"exists"&nbsp;|&nbsp;"error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Cancellation&nbsp;by&nbsp;back&nbsp;command:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"cancelled",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Returned&nbsp;to&nbsp;main&nbsp;menu.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Cancellation&nbsp;by&nbsp;rejecting&nbsp;selected&nbsp;profile&nbsp;or&nbsp;job:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"cancelled",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Resume&nbsp;generation&nbsp;cancelled.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Invalid&nbsp;selection:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"invalid_selection",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Please&nbsp;choose&nbsp;a&nbsp;valid&nbsp;entry&nbsp;number.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Missing&nbsp;selected&nbsp;user&nbsp;ID:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"invalid_selection",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Selected&nbsp;user&nbsp;profile&nbsp;is&nbsp;missing&nbsp;its&nbsp;user&nbsp;ID.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Missing&nbsp;selected&nbsp;application&nbsp;ID:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"invalid_selection",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Selected&nbsp;job&nbsp;analysis&nbsp;is&nbsp;missing&nbsp;its&nbsp;application&nbsp;ID.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;No&nbsp;saved&nbsp;user&nbsp;profiles:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"not_found",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"No&nbsp;user&nbsp;profiles&nbsp;were&nbsp;found.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;No&nbsp;saved&nbsp;job&nbsp;analyses:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"not_found",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"No&nbsp;job&nbsp;analyses&nbsp;were&nbsp;found.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Engine&nbsp;failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;the&nbsp;same&nbsp;failure&nbsp;payloads&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generate_materials_for_saved_records(),&nbsp;including<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"incomplete_profile",&nbsp;"missing_job_analysis",&nbsp;"ai_error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;"generation_failed".<br>
+&nbsp;<br>
+Side&nbsp;effects:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Prints&nbsp;saved&nbsp;profile&nbsp;and&nbsp;job&nbsp;lists,&nbsp;selected&nbsp;record&nbsp;details,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;generated&nbsp;materials,&nbsp;save&nbsp;status,&nbsp;and&nbsp;optional&nbsp;.docx&nbsp;export&nbsp;status<br>
+&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;the&nbsp;terminal.</span></dd></dl>
+</td></tr></table>
+</body></html>

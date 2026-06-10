@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.engine.gemini_client</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.engine.html" class="white">engine</a>.gemini_client</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cengine%5Cgemini_client.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\engine\gemini_client.py</a></td></tr></table>
+    <p><span class="code">Gemini&nbsp;API&nbsp;wrapper&nbsp;for&nbsp;JobFit-AI.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;engine&nbsp;-&gt;&nbsp;Gemini&nbsp;API<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;provides&nbsp;one&nbsp;small&nbsp;wrapper&nbsp;around&nbsp;the&nbsp;Gemini&nbsp;client.&nbsp;It&nbsp;reads<br>
+the&nbsp;Gemini&nbsp;API&nbsp;key&nbsp;and&nbsp;model&nbsp;name&nbsp;from&nbsp;environment&nbsp;variables,&nbsp;sends&nbsp;a<br>
+prompt&nbsp;to&nbsp;Gemini,&nbsp;validates&nbsp;that&nbsp;a&nbsp;non-empty&nbsp;response&nbsp;was&nbsp;returned,&nbsp;and<br>
+closes&nbsp;the&nbsp;Gemini&nbsp;client&nbsp;after&nbsp;the&nbsp;request.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;should&nbsp;not&nbsp;parse&nbsp;application-specific&nbsp;JSON.&nbsp;Other&nbsp;engine<br>
+modules&nbsp;are&nbsp;responsible&nbsp;for&nbsp;interpreting&nbsp;Gemini's&nbsp;text&nbsp;response.<br>
+&nbsp;<br>
+Environment&nbsp;variables:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;GEMINI_API_KEY:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Required.&nbsp;API&nbsp;key&nbsp;used&nbsp;to&nbsp;authenticate&nbsp;with&nbsp;Gemini.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;GEMINI_MODEL:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Optional.&nbsp;Gemini&nbsp;model&nbsp;name.&nbsp;If&nbsp;this&nbsp;variable&nbsp;is&nbsp;not&nbsp;set,&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;module&nbsp;uses&nbsp;"gemini-2.5-flash".<br>
+&nbsp;<br>
+Error&nbsp;contract:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;module&nbsp;raises&nbsp;RuntimeError&nbsp;instead&nbsp;of&nbsp;returning&nbsp;response<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dictionaries&nbsp;because&nbsp;it&nbsp;is&nbsp;a&nbsp;low-level&nbsp;API&nbsp;wrapper.&nbsp;Engine&nbsp;modules<br>
+&nbsp;&nbsp;&nbsp;&nbsp;catch&nbsp;these&nbsp;errors&nbsp;and&nbsp;convert&nbsp;them&nbsp;into&nbsp;user-facing&nbsp;status&nbsp;payloads<br>
+&nbsp;&nbsp;&nbsp;&nbsp;such&nbsp;as&nbsp;"ai_error".</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="google.genai.html">google.genai</a><br>
+</td><td class="multicolumn"><a href="os.html">os</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-call_gemini"><strong>call_gemini</strong></a>(prompt: str) -&gt; str</dt><dd><span class="code">Call&nbsp;Gemini&nbsp;API&nbsp;and&nbsp;return&nbsp;the&nbsp;raw&nbsp;response&nbsp;text.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;prompt&nbsp;(str):&nbsp;Prompt&nbsp;text&nbsp;sent&nbsp;to&nbsp;Gemini.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;Non-empty&nbsp;raw&nbsp;response&nbsp;text&nbsp;returned&nbsp;by&nbsp;Gemini.<br>
+&nbsp;<br>
+Raises:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;RuntimeError:&nbsp;If&nbsp;GEMINI_API_KEY&nbsp;is&nbsp;missing&nbsp;or&nbsp;blank.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;RuntimeError:&nbsp;If&nbsp;Gemini&nbsp;returns&nbsp;an&nbsp;empty&nbsp;response.<br>
+&nbsp;<br>
+Notes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;function&nbsp;does&nbsp;not&nbsp;clean&nbsp;Markdown&nbsp;code&nbsp;fences,&nbsp;parse&nbsp;JSON,&nbsp;or<br>
+&nbsp;&nbsp;&nbsp;&nbsp;validate&nbsp;application-specific&nbsp;fields.&nbsp;The&nbsp;caller&nbsp;is&nbsp;responsible&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interpreting&nbsp;the&nbsp;returned&nbsp;text.</span></dd></dl>
+</td></tr></table>
+</body></html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.storage.google_sheets</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.storage.html" class="white">storage</a>.google_sheets</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cstorage%5Cgoogle_sheets.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\storage\google_sheets.py</a></td></tr></table>
+    <p><span class="code">Shared&nbsp;Google&nbsp;Sheets&nbsp;connection&nbsp;helper.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;storage&nbsp;-&gt;&nbsp;Google&nbsp;Sheets<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;centralizes&nbsp;the&nbsp;Google&nbsp;Sheets&nbsp;connection&nbsp;logic&nbsp;used&nbsp;by&nbsp;the<br>
+storage&nbsp;layer.&nbsp;Other&nbsp;storage&nbsp;modules&nbsp;call&nbsp;<a href="#-get_worksheet">get_worksheet</a>()&nbsp;to&nbsp;access&nbsp;a<br>
+specific&nbsp;worksheet&nbsp;tab.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;uses&nbsp;service_account.json&nbsp;for&nbsp;authentication&nbsp;and&nbsp;reads&nbsp;the<br>
+Google&nbsp;Sheet&nbsp;name&nbsp;from&nbsp;the&nbsp;GOOGLE_SHEET_NAME&nbsp;environment&nbsp;variable.&nbsp;If<br>
+GOOGLE_SHEET_NAME&nbsp;is&nbsp;not&nbsp;set,&nbsp;the&nbsp;default&nbsp;sheet&nbsp;name&nbsp;is&nbsp;"JobFit-AI".<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;should&nbsp;not&nbsp;validate&nbsp;application&nbsp;records,&nbsp;parse&nbsp;stored&nbsp;rows,<br>
+call&nbsp;Gemini,&nbsp;or&nbsp;format&nbsp;terminal&nbsp;output.&nbsp;Its&nbsp;only&nbsp;responsibility&nbsp;is&nbsp;to<br>
+return&nbsp;the&nbsp;requested&nbsp;Google&nbsp;Sheets&nbsp;worksheet&nbsp;object.</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="gspread.html">gspread</a><br>
+</td><td class="multicolumn"><a href="os.html">os</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-get_worksheet"><strong>get_worksheet</strong></a>(worksheet_name: str | None = None)</dt><dd><span class="code">Return&nbsp;a&nbsp;Google&nbsp;Sheets&nbsp;worksheet.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;worksheet_name&nbsp;(str&nbsp;|&nbsp;None):&nbsp;Name&nbsp;of&nbsp;the&nbsp;worksheet&nbsp;tab&nbsp;to&nbsp;open.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;None,&nbsp;the&nbsp;first&nbsp;worksheet&nbsp;in&nbsp;the&nbsp;Google&nbsp;Sheet&nbsp;is&nbsp;returned.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gspread.worksheet.Worksheet:&nbsp;Google&nbsp;Sheets&nbsp;worksheet&nbsp;object.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Possible&nbsp;return&nbsp;values:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;worksheet_name&nbsp;is&nbsp;None:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;the&nbsp;first&nbsp;worksheet&nbsp;in&nbsp;the&nbsp;spreadsheet.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;worksheet_name&nbsp;is&nbsp;a&nbsp;string:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;the&nbsp;worksheet&nbsp;tab&nbsp;with&nbsp;that&nbsp;exact&nbsp;name.<br>
+&nbsp;<br>
+Raises:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;FileNotFoundError:&nbsp;If&nbsp;service_account.json&nbsp;is&nbsp;missing.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gspread.exceptions.SpreadsheetNotFound:&nbsp;If&nbsp;the&nbsp;configured&nbsp;Google<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sheet&nbsp;cannot&nbsp;be&nbsp;found&nbsp;or&nbsp;the&nbsp;service&nbsp;account&nbsp;does&nbsp;not&nbsp;have&nbsp;access.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;gspread.exceptions.WorksheetNotFound:&nbsp;If&nbsp;worksheet_name&nbsp;is&nbsp;provided<br>
+&nbsp;&nbsp;&nbsp;&nbsp;but&nbsp;no&nbsp;worksheet&nbsp;with&nbsp;that&nbsp;name&nbsp;exists.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Exception:&nbsp;If&nbsp;Google&nbsp;Sheets&nbsp;authentication&nbsp;or&nbsp;API&nbsp;access&nbsp;fails&nbsp;for<br>
+&nbsp;&nbsp;&nbsp;&nbsp;another&nbsp;reason.<br>
+&nbsp;<br>
+Environment&nbsp;variables:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;GOOGLE_SHEET_NAME:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Optional.&nbsp;Name&nbsp;of&nbsp;the&nbsp;Google&nbsp;Sheet&nbsp;to&nbsp;open.&nbsp;If&nbsp;missing,&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default&nbsp;value&nbsp;is&nbsp;"JobFit-AI".</span></dd></dl>
+</td></tr></table>
+</body></html>

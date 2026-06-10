@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.interface.user_profile_cli</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.interface.html" class="white">interface</a>.user_profile_cli</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cinterface%5Cuser_profile_cli.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\interface\user_profile_cli.py</a></td></tr></table>
+    <p><span class="code">Command-line&nbsp;flow&nbsp;for&nbsp;collecting&nbsp;and&nbsp;saving&nbsp;user&nbsp;profiles.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;-&gt;&nbsp;engine&nbsp;-&gt;&nbsp;storage<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;asks&nbsp;the&nbsp;user&nbsp;for&nbsp;profile&nbsp;information&nbsp;such&nbsp;as&nbsp;name,&nbsp;email,<br>
+phone&nbsp;number,&nbsp;university,&nbsp;degree,&nbsp;skills,&nbsp;projects,&nbsp;and&nbsp;experience.<br>
+It&nbsp;sends&nbsp;the&nbsp;structured&nbsp;profile&nbsp;data&nbsp;to&nbsp;the&nbsp;engine&nbsp;layer&nbsp;and&nbsp;displays<br>
+the&nbsp;resulting&nbsp;success,&nbsp;cancellation,&nbsp;or&nbsp;error&nbsp;message.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;only&nbsp;handles&nbsp;terminal&nbsp;input&nbsp;and&nbsp;output.&nbsp;It&nbsp;does&nbsp;not&nbsp;access<br>
+Google&nbsp;Sheets&nbsp;directly&nbsp;and&nbsp;does&nbsp;not&nbsp;generate&nbsp;AI&nbsp;content.<br>
+&nbsp;<br>
+Main&nbsp;status&nbsp;contract:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"success":&nbsp;The&nbsp;user&nbsp;profile&nbsp;was&nbsp;saved&nbsp;successfully.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"cancelled":&nbsp;The&nbsp;user&nbsp;returned&nbsp;to&nbsp;the&nbsp;main&nbsp;menu&nbsp;or&nbsp;chose&nbsp;not&nbsp;to&nbsp;save.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"incomplete":&nbsp;The&nbsp;profile&nbsp;was&nbsp;missing&nbsp;required&nbsp;information.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"storage_error":&nbsp;The&nbsp;profile&nbsp;could&nbsp;not&nbsp;be&nbsp;saved.</span></p>
+<p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-format_user_profile_response"><strong>format_user_profile_response</strong></a>(response: dict) -&gt; str</dt><dd><span class="code">Format&nbsp;a&nbsp;user&nbsp;profile&nbsp;engine&nbsp;response&nbsp;for&nbsp;terminal&nbsp;display.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;response&nbsp;(dict):&nbsp;Response&nbsp;payload&nbsp;returned&nbsp;by&nbsp;save_user_profile().<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;User-facing&nbsp;message&nbsp;for&nbsp;terminal&nbsp;display.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Possible&nbsp;return&nbsp;values:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;status&nbsp;is&nbsp;"success",&nbsp;returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"User&nbsp;profile&nbsp;saved&nbsp;successfully."<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;status&nbsp;is&nbsp;not&nbsp;"success",&nbsp;returns&nbsp;the&nbsp;response&nbsp;message&nbsp;if&nbsp;one<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists;&nbsp;otherwise,&nbsp;returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Something&nbsp;went&nbsp;wrong."</span></dd></dl>
+ <dl><dt><a name="-run_user_profile_flow"><strong>run_user_profile_flow</strong></a>() -&gt; dict</dt><dd><span class="code">Run&nbsp;the&nbsp;user&nbsp;profile&nbsp;collection&nbsp;and&nbsp;save&nbsp;flow.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;None.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"save_status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"user_id":&nbsp;int,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Cancellation&nbsp;by&nbsp;back&nbsp;command:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"cancelled",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Returned&nbsp;to&nbsp;main&nbsp;menu.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Cancellation&nbsp;by&nbsp;save&nbsp;confirmation:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"cancelled",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"User&nbsp;profile&nbsp;was&nbsp;not&nbsp;saved.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Validation&nbsp;failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"incomplete",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"User&nbsp;profile&nbsp;is&nbsp;missing&nbsp;required&nbsp;information.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Storage&nbsp;failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"storage_error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Could&nbsp;not&nbsp;save&nbsp;user&nbsp;profile.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+Side&nbsp;effects:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Prints&nbsp;prompts&nbsp;to&nbsp;the&nbsp;terminal,&nbsp;reads&nbsp;user&nbsp;input,&nbsp;and&nbsp;prints&nbsp;the&nbsp;final<br>
+&nbsp;&nbsp;&nbsp;&nbsp;save&nbsp;or&nbsp;cancellation&nbsp;message.</span></dd></dl>
+</td></tr></table>
+</body></html>

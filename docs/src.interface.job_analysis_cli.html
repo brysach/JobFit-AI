@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.interface.job_analysis_cli</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.interface.html" class="white">interface</a>.job_analysis_cli</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cinterface%5Cjob_analysis_cli.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\interface\job_analysis_cli.py</a></td></tr></table>
+    <p><span class="code">Command-line&nbsp;flow&nbsp;for&nbsp;job&nbsp;description&nbsp;analysis.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;-&gt;&nbsp;engine&nbsp;-&gt;&nbsp;storage<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;collects&nbsp;a&nbsp;pasted&nbsp;job&nbsp;description&nbsp;from&nbsp;the&nbsp;user,&nbsp;asks<br>
+whether&nbsp;the&nbsp;user&nbsp;wants&nbsp;to&nbsp;generate&nbsp;and&nbsp;save&nbsp;the&nbsp;analysis,&nbsp;calls&nbsp;the<br>
+engine&nbsp;layer,&nbsp;and&nbsp;formats&nbsp;the&nbsp;generated&nbsp;job&nbsp;analysis&nbsp;for&nbsp;terminal<br>
+display.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;does&nbsp;not&nbsp;call&nbsp;Gemini&nbsp;directly&nbsp;and&nbsp;does&nbsp;not&nbsp;access&nbsp;Google<br>
+Sheets&nbsp;directly.<br>
+&nbsp;<br>
+Main&nbsp;status&nbsp;contract:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"success":&nbsp;The&nbsp;job&nbsp;description&nbsp;was&nbsp;analyzed&nbsp;successfully.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"cancelled":&nbsp;The&nbsp;user&nbsp;chose&nbsp;to&nbsp;return&nbsp;to&nbsp;the&nbsp;main&nbsp;menu.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"incomplete":&nbsp;The&nbsp;job&nbsp;description&nbsp;was&nbsp;empty.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"invalid_input":&nbsp;The&nbsp;input&nbsp;did&nbsp;not&nbsp;appear&nbsp;to&nbsp;describe&nbsp;a&nbsp;job.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"ai_error":&nbsp;Gemini&nbsp;failed&nbsp;or&nbsp;returned&nbsp;unusable&nbsp;output.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"storage_error":&nbsp;The&nbsp;analyzed&nbsp;job&nbsp;could&nbsp;not&nbsp;be&nbsp;saved.</span></p>
+<p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-format_analysis_response"><strong>format_analysis_response</strong></a>(response: dict) -&gt; str</dt><dd><span class="code">Convert&nbsp;an&nbsp;engine&nbsp;response&nbsp;into&nbsp;readable&nbsp;job&nbsp;analysis&nbsp;text.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;response&nbsp;(dict):&nbsp;Response&nbsp;payload&nbsp;returned&nbsp;by&nbsp;the&nbsp;job&nbsp;analysis&nbsp;engine.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;User-facing&nbsp;text&nbsp;for&nbsp;terminal&nbsp;display.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Possible&nbsp;return&nbsp;values:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;status&nbsp;is&nbsp;"success",&nbsp;returns&nbsp;formatted&nbsp;job&nbsp;analysis&nbsp;text&nbsp;with:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;company&nbsp;name<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;job&nbsp;title<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;required&nbsp;skills<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;preferred&nbsp;skills<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;responsibilities<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;keywords<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;optional&nbsp;save&nbsp;status<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;status&nbsp;is&nbsp;not&nbsp;"success",&nbsp;returns&nbsp;the&nbsp;response&nbsp;message&nbsp;if&nbsp;one<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists;&nbsp;otherwise,&nbsp;returns&nbsp;"Something&nbsp;went&nbsp;wrong.".</span></dd></dl>
+ <dl><dt><a name="-run_job_analysis_flow"><strong>run_job_analysis_flow</strong></a>() -&gt; dict</dt><dd><span class="code">Run&nbsp;the&nbsp;job&nbsp;description&nbsp;analysis&nbsp;option.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;None.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"data":&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"company_name":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"job_title":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"required_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"preferred_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"responsibilities":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"keywords":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success&nbsp;with&nbsp;saving:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"data":&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"company_name":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"job_title":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"required_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"preferred_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"responsibilities":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"keywords":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"save_status":&nbsp;"success"&nbsp;|&nbsp;"error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Cancellation:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"cancelled",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Returned&nbsp;to&nbsp;main&nbsp;menu.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Engine&nbsp;failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Returns&nbsp;the&nbsp;same&nbsp;failure&nbsp;payloads&nbsp;as&nbsp;analyze_job_description(),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;including&nbsp;"incomplete",&nbsp;"invalid_input",&nbsp;and&nbsp;"ai_error".<br>
+&nbsp;<br>
+Side&nbsp;effects:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Prints&nbsp;prompts&nbsp;and&nbsp;formatted&nbsp;output&nbsp;to&nbsp;the&nbsp;terminal.</span></dd></dl>
+</td></tr></table>
+</body></html>

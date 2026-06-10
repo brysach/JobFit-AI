@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.storage.job_analysis_storage</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.storage.html" class="white">storage</a>.job_analysis_storage</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cstorage%5Cjob_analysis_storage.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\storage\job_analysis_storage.py</a></td></tr></table>
+    <p><span class="code">Storage&nbsp;layer&nbsp;for&nbsp;saved&nbsp;job&nbsp;analyses.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;engine&nbsp;-&gt;&nbsp;storage&nbsp;-&gt;&nbsp;Google&nbsp;Sheets<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;stores,&nbsp;retrieves,&nbsp;lists,&nbsp;and&nbsp;deletes&nbsp;job&nbsp;analysis&nbsp;records<br>
+in&nbsp;the&nbsp;jobsAnalysis&nbsp;worksheet.&nbsp;It&nbsp;is&nbsp;responsible&nbsp;for&nbsp;assigning&nbsp;new<br>
+application&nbsp;IDs&nbsp;and&nbsp;converting&nbsp;saved&nbsp;Google&nbsp;Sheets&nbsp;rows&nbsp;into&nbsp;structured<br>
+Python&nbsp;dictionaries.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;should&nbsp;not&nbsp;collect&nbsp;terminal&nbsp;input,&nbsp;call&nbsp;Gemini,&nbsp;or&nbsp;format<br>
+user-facing&nbsp;output.<br>
+&nbsp;<br>
+Google&nbsp;Sheet&nbsp;tab:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;jobsAnalysis<br>
+&nbsp;<br>
+Expected&nbsp;worksheet&nbsp;columns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;application_id&nbsp;|&nbsp;company_name&nbsp;|&nbsp;job_title&nbsp;|&nbsp;required_skills&nbsp;|&nbsp;keywords<br>
+&nbsp;<br>
+Main&nbsp;status&nbsp;contract:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"success":&nbsp;The&nbsp;requested&nbsp;storage&nbsp;operation&nbsp;completed&nbsp;successfully.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"not_found":&nbsp;A&nbsp;requested&nbsp;job&nbsp;analysis&nbsp;record&nbsp;was&nbsp;not&nbsp;found.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"error":&nbsp;Required&nbsp;fields&nbsp;were&nbsp;missing&nbsp;or&nbsp;the&nbsp;Google&nbsp;Sheets&nbsp;operation&nbsp;failed.</span></p>
+<p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-delete_job_analysis_by_row"><strong>delete_job_analysis_by_row</strong></a>(row_number: int) -&gt; dict</dt><dd><span class="code">Delete&nbsp;a&nbsp;job&nbsp;analysis&nbsp;by&nbsp;its&nbsp;Google&nbsp;Sheets&nbsp;row&nbsp;number.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;row_number&nbsp;(int):&nbsp;Actual&nbsp;row&nbsp;number&nbsp;in&nbsp;the&nbsp;jobsAnalysis&nbsp;worksheet.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;header&nbsp;row&nbsp;is&nbsp;row&nbsp;1,&nbsp;so&nbsp;valid&nbsp;deletable&nbsp;records&nbsp;must&nbsp;have&nbsp;row<br>
+&nbsp;&nbsp;&nbsp;&nbsp;number&nbsp;2&nbsp;or&nbsp;greater.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;error&nbsp;status&nbsp;is&nbsp;returned&nbsp;if&nbsp;row_number&nbsp;is&nbsp;1&nbsp;or&nbsp;lower,&nbsp;or&nbsp;if<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;Google&nbsp;Sheets&nbsp;delete&nbsp;operation&nbsp;fails.</span></dd></dl>
+ <dl><dt><a name="-get_job_analysis"><strong>get_job_analysis</strong></a>(application_id: int | str) -&gt; dict</dt><dd><span class="code">Retrieve&nbsp;a&nbsp;saved&nbsp;job&nbsp;analysis&nbsp;by&nbsp;application&nbsp;ID.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;application_id&nbsp;(int&nbsp;|&nbsp;str):&nbsp;Application&nbsp;ID&nbsp;of&nbsp;the&nbsp;saved&nbsp;job&nbsp;analysis<br>
+&nbsp;&nbsp;&nbsp;&nbsp;record&nbsp;to&nbsp;retrieve.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"data":&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"application_id":&nbsp;int&nbsp;|&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"company_name":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"job_title":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"required_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"keywords":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"not_found",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Job&nbsp;analysis&nbsp;record&nbsp;was&nbsp;not&nbsp;found.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;not_found&nbsp;status&nbsp;is&nbsp;returned&nbsp;when&nbsp;no&nbsp;matching&nbsp;application&nbsp;ID<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists&nbsp;or&nbsp;when&nbsp;the&nbsp;Google&nbsp;Sheets&nbsp;read&nbsp;operation&nbsp;fails.</span></dd></dl>
+ <dl><dt><a name="-list_job_analyses"><strong>list_job_analyses</strong></a>() -&gt; dict</dt><dd><span class="code">Return&nbsp;all&nbsp;saved&nbsp;job&nbsp;analyses&nbsp;with&nbsp;their&nbsp;sheet&nbsp;row&nbsp;numbers.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;None.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"data":&nbsp;[<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"row_number":&nbsp;int,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"application_id":&nbsp;int&nbsp;|&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"company_name":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"job_title":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"required_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"keywords":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Could&nbsp;not&nbsp;retrieve&nbsp;job&nbsp;analyses.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Notes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;row_number&nbsp;value&nbsp;is&nbsp;the&nbsp;actual&nbsp;Google&nbsp;Sheets&nbsp;row&nbsp;number.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It&nbsp;is&nbsp;used&nbsp;internally&nbsp;for&nbsp;deletion&nbsp;and&nbsp;should&nbsp;not&nbsp;be&nbsp;treated&nbsp;as<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;same&nbsp;thing&nbsp;as&nbsp;application_id.</span></dd></dl>
+ <dl><dt><a name="-save_job_analysis"><strong>save_job_analysis</strong></a>(job_analysis: dict) -&gt; dict</dt><dd><span class="code">Save&nbsp;analyzed&nbsp;job&nbsp;description&nbsp;data.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;job_analysis&nbsp;(dict):&nbsp;Job&nbsp;analysis&nbsp;record&nbsp;prepared&nbsp;by&nbsp;the&nbsp;engine&nbsp;layer.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Expected&nbsp;format:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"company_name":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"job_title":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"required_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"keywords":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"application_id":&nbsp;int,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;error&nbsp;status&nbsp;means&nbsp;required&nbsp;fields&nbsp;were&nbsp;missing&nbsp;or&nbsp;the&nbsp;Google<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sheets&nbsp;append&nbsp;operation&nbsp;failed.</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>REQUIRED_JOB_ANALYSIS_KEYS</strong> = {'company_name', 'job_title', 'keywords', 'required_skills'}</td></tr></table>
+</body></html>

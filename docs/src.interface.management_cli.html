@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.interface.management_cli</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.interface.html" class="white">interface</a>.management_cli</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cinterface%5Cmanagement_cli.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\interface\management_cli.py</a></td></tr></table>
+    <p><span class="code">Command-line&nbsp;flows&nbsp;for&nbsp;managing&nbsp;saved&nbsp;records.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;-&gt;&nbsp;engine&nbsp;-&gt;&nbsp;storage<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;displays&nbsp;saved&nbsp;user&nbsp;profiles&nbsp;and&nbsp;saved&nbsp;job&nbsp;analyses,<br>
+shows&nbsp;full&nbsp;details&nbsp;for&nbsp;selected&nbsp;records,&nbsp;asks&nbsp;for&nbsp;deletion&nbsp;confirmation,<br>
+and&nbsp;sends&nbsp;delete&nbsp;requests&nbsp;to&nbsp;the&nbsp;engine&nbsp;layer.<br>
+&nbsp;<br>
+The&nbsp;interface&nbsp;uses&nbsp;displayed&nbsp;list&nbsp;numbers&nbsp;instead&nbsp;of&nbsp;exposing&nbsp;backend<br>
+row&nbsp;numbers&nbsp;directly&nbsp;to&nbsp;the&nbsp;user.<br>
+&nbsp;<br>
+Main&nbsp;status&nbsp;contract:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"success":&nbsp;The&nbsp;selected&nbsp;saved&nbsp;record&nbsp;was&nbsp;deleted&nbsp;successfully.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"cancelled":&nbsp;The&nbsp;user&nbsp;chose&nbsp;to&nbsp;return&nbsp;to&nbsp;the&nbsp;main&nbsp;menu&nbsp;or&nbsp;cancelled&nbsp;deletion.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"invalid_selection":&nbsp;The&nbsp;user&nbsp;selected&nbsp;an&nbsp;invalid&nbsp;list&nbsp;entry.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"not_found":&nbsp;No&nbsp;saved&nbsp;records&nbsp;were&nbsp;found.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"error":&nbsp;The&nbsp;storage&nbsp;layer&nbsp;could&nbsp;not&nbsp;complete&nbsp;the&nbsp;requested&nbsp;operation.</span></p>
+<p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-format_job_analyses_summary_response"><strong>format_job_analyses_summary_response</strong></a>(response: dict) -&gt; str</dt><dd><span class="code">Format&nbsp;saved&nbsp;job&nbsp;analyses&nbsp;as&nbsp;a&nbsp;short&nbsp;numbered&nbsp;list.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;response&nbsp;(dict):&nbsp;Response&nbsp;payload&nbsp;returned&nbsp;by&nbsp;list_job_analyses().<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;User-facing&nbsp;text&nbsp;for&nbsp;terminal&nbsp;display.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Possible&nbsp;return&nbsp;values:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;status&nbsp;is&nbsp;"success"&nbsp;and&nbsp;jobs&nbsp;exist,&nbsp;returns&nbsp;a&nbsp;numbered&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;using&nbsp;this&nbsp;format:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.&nbsp;Company&nbsp;Name&nbsp;|&nbsp;Job&nbsp;Title<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;status&nbsp;is&nbsp;"success"&nbsp;but&nbsp;the&nbsp;list&nbsp;is&nbsp;empty,&nbsp;returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"No&nbsp;job&nbsp;analyses&nbsp;were&nbsp;found."<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;status&nbsp;is&nbsp;not&nbsp;"success",&nbsp;returns&nbsp;the&nbsp;response&nbsp;message&nbsp;if&nbsp;one<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists;&nbsp;otherwise,&nbsp;returns&nbsp;"Could&nbsp;not&nbsp;retrieve&nbsp;job&nbsp;analyses.".</span></dd></dl>
+ <dl><dt><a name="-format_job_analysis_details"><strong>format_job_analysis_details</strong></a>(job: dict) -&gt; str</dt><dd><span class="code">Format&nbsp;one&nbsp;complete&nbsp;job&nbsp;analysis&nbsp;after&nbsp;it&nbsp;is&nbsp;selected.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;job&nbsp;(dict):&nbsp;Selected&nbsp;job&nbsp;analysis&nbsp;record.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Expected&nbsp;format:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"company_name":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"job_title":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"required_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"keywords":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;User-facing&nbsp;text&nbsp;containing&nbsp;the&nbsp;selected&nbsp;job's&nbsp;company&nbsp;name,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;job&nbsp;title,&nbsp;required&nbsp;skills,&nbsp;and&nbsp;keywords.</span></dd></dl>
+ <dl><dt><a name="-format_user_profile_details"><strong>format_user_profile_details</strong></a>(profile: dict) -&gt; str</dt><dd><span class="code">Format&nbsp;one&nbsp;complete&nbsp;user&nbsp;profile&nbsp;after&nbsp;it&nbsp;is&nbsp;selected.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;profile&nbsp;(dict):&nbsp;Selected&nbsp;user&nbsp;profile&nbsp;record.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Expected&nbsp;format:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"email":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"phone_number":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"university":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"degree":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"projects":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"experience":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;User-facing&nbsp;text&nbsp;containing&nbsp;the&nbsp;selected&nbsp;profile's&nbsp;contact<br>
+&nbsp;&nbsp;&nbsp;&nbsp;information,&nbsp;education&nbsp;information,&nbsp;skills,&nbsp;projects,&nbsp;and&nbsp;experience.</span></dd></dl>
+ <dl><dt><a name="-format_user_profiles_summary_response"><strong>format_user_profiles_summary_response</strong></a>(response: dict) -&gt; str</dt><dd><span class="code">Format&nbsp;saved&nbsp;user&nbsp;profiles&nbsp;as&nbsp;a&nbsp;short&nbsp;numbered&nbsp;list.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;response&nbsp;(dict):&nbsp;Response&nbsp;payload&nbsp;returned&nbsp;by&nbsp;list_user_profiles().<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;User-facing&nbsp;text&nbsp;for&nbsp;terminal&nbsp;display.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Possible&nbsp;return&nbsp;values:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;status&nbsp;is&nbsp;"success"&nbsp;and&nbsp;profiles&nbsp;exist,&nbsp;returns&nbsp;a&nbsp;numbered<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;list&nbsp;using&nbsp;this&nbsp;format:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.&nbsp;Name&nbsp;|&nbsp;University&nbsp;|&nbsp;Degree<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;status&nbsp;is&nbsp;"success"&nbsp;but&nbsp;the&nbsp;list&nbsp;is&nbsp;empty,&nbsp;returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"No&nbsp;user&nbsp;profiles&nbsp;were&nbsp;found."<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;status&nbsp;is&nbsp;not&nbsp;"success",&nbsp;returns&nbsp;the&nbsp;response&nbsp;message&nbsp;if&nbsp;one<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;exists;&nbsp;otherwise,&nbsp;returns&nbsp;"Could&nbsp;not&nbsp;retrieve&nbsp;user&nbsp;profiles.".</span></dd></dl>
+ <dl><dt><a name="-run_manage_jobs_flow"><strong>run_manage_jobs_flow</strong></a>() -&gt; dict</dt><dd><span class="code">Show&nbsp;saved&nbsp;jobs,&nbsp;show&nbsp;selected&nbsp;details,&nbsp;and&nbsp;delete&nbsp;after&nbsp;confirmation.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;None.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Job&nbsp;analysis&nbsp;deleted&nbsp;successfully.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Cancellation&nbsp;by&nbsp;back&nbsp;command:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"cancelled",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Returned&nbsp;to&nbsp;main&nbsp;menu.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Cancellation&nbsp;by&nbsp;delete&nbsp;confirmation:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"cancelled",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Delete&nbsp;cancelled.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Invalid&nbsp;selection:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"invalid_selection",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Please&nbsp;choose&nbsp;a&nbsp;valid&nbsp;entry&nbsp;number.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;No&nbsp;saved&nbsp;jobs:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"not_found",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"No&nbsp;job&nbsp;analyses&nbsp;were&nbsp;found.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Storage&nbsp;failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+Side&nbsp;effects:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Prints&nbsp;saved&nbsp;job&nbsp;summaries,&nbsp;selected&nbsp;job&nbsp;details,&nbsp;prompts,&nbsp;and&nbsp;delete<br>
+&nbsp;&nbsp;&nbsp;&nbsp;status&nbsp;messages&nbsp;to&nbsp;the&nbsp;terminal.</span></dd></dl>
+ <dl><dt><a name="-run_manage_users_flow"><strong>run_manage_users_flow</strong></a>() -&gt; dict</dt><dd><span class="code">Show&nbsp;saved&nbsp;users,&nbsp;show&nbsp;selected&nbsp;details,&nbsp;and&nbsp;delete&nbsp;after&nbsp;confirmation.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;None.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"User&nbsp;profile&nbsp;deleted&nbsp;successfully.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Cancellation&nbsp;by&nbsp;back&nbsp;command:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"cancelled",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Returned&nbsp;to&nbsp;main&nbsp;menu.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Cancellation&nbsp;by&nbsp;delete&nbsp;confirmation:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"cancelled",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Delete&nbsp;cancelled.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Invalid&nbsp;selection:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"invalid_selection",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Please&nbsp;choose&nbsp;a&nbsp;valid&nbsp;entry&nbsp;number.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;No&nbsp;saved&nbsp;profiles:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"not_found",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"No&nbsp;user&nbsp;profiles&nbsp;were&nbsp;found.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Storage&nbsp;failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+Side&nbsp;effects:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Prints&nbsp;saved&nbsp;profile&nbsp;summaries,&nbsp;selected&nbsp;profile&nbsp;details,&nbsp;prompts,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;delete&nbsp;status&nbsp;messages&nbsp;to&nbsp;the&nbsp;terminal.</span></dd></dl>
+</td></tr></table>
+</body></html>

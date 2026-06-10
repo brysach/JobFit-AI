@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.storage.materials_storage</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.storage.html" class="white">storage</a>.materials_storage</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cstorage%5Cmaterials_storage.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\storage\materials_storage.py</a></td></tr></table>
+    <p><span class="code">Storage&nbsp;layer&nbsp;for&nbsp;generated&nbsp;application&nbsp;materials.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;engine&nbsp;-&gt;&nbsp;storage&nbsp;-&gt;&nbsp;Google&nbsp;Sheets<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;stores&nbsp;and&nbsp;retrieves&nbsp;generated&nbsp;resume&nbsp;sections,&nbsp;cover<br>
+letters,&nbsp;strengths,&nbsp;and&nbsp;weaknesses&nbsp;in&nbsp;the&nbsp;generatedMaterials&nbsp;worksheet.<br>
+It&nbsp;prevents&nbsp;duplicate&nbsp;saved&nbsp;materials&nbsp;for&nbsp;the&nbsp;same&nbsp;user&nbsp;and&nbsp;job<br>
+combination.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;does&nbsp;not&nbsp;generate&nbsp;AI&nbsp;content&nbsp;and&nbsp;does&nbsp;not&nbsp;format&nbsp;terminal<br>
+output.<br>
+&nbsp;<br>
+Google&nbsp;Sheet&nbsp;tab:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;generatedMaterials<br>
+&nbsp;<br>
+Expected&nbsp;worksheet&nbsp;columns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;application_id&nbsp;|&nbsp;user_id&nbsp;|&nbsp;resume_skills&nbsp;|&nbsp;resume_projects&nbsp;|<br>
+&nbsp;&nbsp;&nbsp;&nbsp;resume_experience&nbsp;|&nbsp;cover_letter&nbsp;|&nbsp;strengths&nbsp;|&nbsp;weaknesses<br>
+&nbsp;<br>
+Main&nbsp;status&nbsp;contract:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"success":&nbsp;Generated&nbsp;materials&nbsp;were&nbsp;saved&nbsp;or&nbsp;retrieved&nbsp;successfully.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"exists":&nbsp;Generated&nbsp;materials&nbsp;already&nbsp;exist&nbsp;for&nbsp;the&nbsp;same&nbsp;user&nbsp;and&nbsp;job.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"not_found":&nbsp;No&nbsp;generated&nbsp;materials&nbsp;matched&nbsp;the&nbsp;requested&nbsp;IDs.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;"error":&nbsp;Required&nbsp;fields&nbsp;were&nbsp;missing&nbsp;or&nbsp;the&nbsp;Google&nbsp;Sheets&nbsp;operation&nbsp;failed.</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="json.html">json</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-get_generated_materials"><strong>get_generated_materials</strong></a>(
+    application_id: int | str,
+    user_id: int | str | None = None
+) -&gt; dict</dt><dd><span class="code">Retrieve&nbsp;generated&nbsp;materials&nbsp;by&nbsp;application&nbsp;ID&nbsp;and&nbsp;optional&nbsp;user&nbsp;ID.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;application_id&nbsp;(int&nbsp;|&nbsp;str):&nbsp;Application&nbsp;ID&nbsp;of&nbsp;the&nbsp;saved&nbsp;generated<br>
+&nbsp;&nbsp;&nbsp;&nbsp;materials&nbsp;record.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;user_id&nbsp;(int&nbsp;|&nbsp;str&nbsp;|&nbsp;None):&nbsp;Optional&nbsp;user&nbsp;ID&nbsp;used&nbsp;to&nbsp;narrow&nbsp;the&nbsp;search.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;None,&nbsp;the&nbsp;first&nbsp;record&nbsp;matching&nbsp;application_id&nbsp;is&nbsp;returned.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Response&nbsp;payload&nbsp;with&nbsp;one&nbsp;of&nbsp;these&nbsp;possible&nbsp;statuses:<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Success:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"success",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"data":&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"application_id":&nbsp;int&nbsp;|&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"user_id":&nbsp;int&nbsp;|&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"resume":&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"projects":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"experience":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"cover_letter":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"strengths":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"weaknesses":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Not&nbsp;found:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"not_found",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Generated&nbsp;materials&nbsp;were&nbsp;not&nbsp;found.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Storage&nbsp;failure:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"status":&nbsp;"error",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"message":&nbsp;"Could&nbsp;not&nbsp;retrieve&nbsp;generated&nbsp;materials.",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+Notes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;resume_skills,&nbsp;resume_projects,&nbsp;resume_experience,&nbsp;strengths,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;weaknesses&nbsp;fields&nbsp;are&nbsp;stored&nbsp;as&nbsp;JSON&nbsp;strings&nbsp;in&nbsp;Google&nbsp;Sheets&nbsp;and<br>
+&nbsp;&nbsp;&nbsp;&nbsp;converted&nbsp;back&nbsp;into&nbsp;Python&nbsp;lists&nbsp;before&nbsp;being&nbsp;returned.</span></dd></dl>
+ <dl><dt><a name="-save_generated_materials"><strong>save_generated_materials</strong></a>(materials: dict) -&gt; str</dt><dd><span class="code">Save&nbsp;generated&nbsp;resume,&nbsp;cover&nbsp;letter,&nbsp;strengths,&nbsp;and&nbsp;weaknesses.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;materials&nbsp;(dict):&nbsp;Generated&nbsp;materials&nbsp;record&nbsp;prepared&nbsp;by&nbsp;the&nbsp;engine<br>
+&nbsp;&nbsp;&nbsp;&nbsp;layer.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Expected&nbsp;format:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"application_id":&nbsp;int&nbsp;|&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"user_id":&nbsp;int&nbsp;|&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"resume_skills":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"resume_projects":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"resume_experience":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"cover_letter":&nbsp;str,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"strengths":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"weaknesses":&nbsp;list[str],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;Save&nbsp;status.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Possible&nbsp;return&nbsp;values:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"success":<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;generated&nbsp;materials&nbsp;were&nbsp;saved&nbsp;successfully.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"exists":<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;generated&nbsp;materials&nbsp;record&nbsp;already&nbsp;exists&nbsp;for&nbsp;the&nbsp;same<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;application_id&nbsp;and&nbsp;user_id.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"error":<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;input&nbsp;was&nbsp;invalid,&nbsp;required&nbsp;keys&nbsp;were&nbsp;missing,&nbsp;or&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Google&nbsp;Sheets&nbsp;operation&nbsp;failed.</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>REQUIRED_GENERATED_MATERIALS_KEYS</strong> = {'application_id', 'cover_letter', 'resume_experience', 'resume_projects', 'resume_skills', 'strengths', ...}</td></tr></table>
+</body></html>
