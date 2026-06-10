@@ -15,6 +15,20 @@ Generated materials include structured resume sections, a cover letter,
 strengths for the target job, and weaknesses with preparation advice.
 The module returns response dictionaries with a "status" field instead
 of printing output directly.
+
+Main status contract:
+    - "success": Application materials were generated successfully.
+    - "incomplete_profile": The user profile is missing required fields.
+    - "missing_job_analysis": The job analysis is missing required fields.
+    - "ai_error": Gemini failed while generating materials.
+    - "generation_failed": Gemini returned invalid or badly formatted output.
+    - "not_found": A saved user profile or job analysis was not found.
+    - "error": Storage could not retrieve or save the requested data.
+
+Saved materials status contract:
+    - "success": Generated materials were saved successfully.
+    - "exists": Generated materials already exist for that user and job.
+    - "error": Generated materials could not be saved.
 """
 
 from __future__ import annotations
@@ -100,6 +114,16 @@ Job analysis:
 
 
 def _clean_json_response(text: str) -> str:
+    """Remove Markdown code fences from Gemini JSON output.
+
+    Parameters:
+        text (str): Raw Gemini response text.
+
+    Returns:
+        str: Cleaned response text with surrounding Markdown code fences
+        removed when they are present.
+    """
+
     cleaned_text = text.strip()
 
     if cleaned_text.startswith("```json"):
@@ -115,10 +139,43 @@ def _clean_json_response(text: str) -> str:
 
 
 def _is_string_list(value: object) -> bool:
+    """Return True if a value is a list containing only strings.
+
+    Parameters:
+        value (object): Value to validate.
+
+    Returns:
+        bool: True if value is a list and every item in the list is a
+        string; otherwise, False.
+    """
+
     return isinstance(value, list) and all(isinstance(item, str) for item in value)
 
 
 def _is_valid_user_profile(user_profile: dict) -> bool:
+    """Validate that a user profile has the required application fields.
+
+    Parameters:
+        user_profile (dict): User profile data retrieved from storage or
+        passed directly into the engine.
+
+        Expected format:
+            {
+                "name": str,
+                "email": str,
+                "phone_number": str,
+                "university": str,
+                "degree": str,
+                "skills": list[str],
+                "projects": list[str],
+                "experience": list[str],
+            }
+
+    Returns:
+        bool: True if the profile contains all required fields with valid
+        types; otherwise, False.
+    """
+
     if not isinstance(user_profile, dict):
         return False
 
@@ -151,6 +208,25 @@ def _is_valid_user_profile(user_profile: dict) -> bool:
 
 
 def _is_valid_job_analysis(job_analysis: dict) -> bool:
+    """Validate that a job analysis has the required application fields.
+
+    Parameters:
+        job_analysis (dict): Job analysis data retrieved from storage or
+        passed directly into the engine.
+
+        Expected format:
+            {
+                "company_name": str,
+                "job_title": str,
+                "required_skills": list[str],
+                "keywords": list[str],
+            }
+
+    Returns:
+        bool: True if the job analysis contains all required fields with
+        valid types; otherwise, False.
+    """
+
     if not isinstance(job_analysis, dict):
         return False
 
@@ -173,6 +249,28 @@ def _is_valid_job_analysis(job_analysis: dict) -> bool:
 
 
 def _parse_materials_response(text: str) -> dict | None:
+    """Parse and validate Gemini's generated materials response.
+
+    Parameters:
+        text (str): Raw Gemini response text.
+
+    Returns:
+        dict | None: A validated generated materials dictionary if Gemini
+        returned usable JSON with all required fields; otherwise, None.
+
+        Successful dictionary format:
+            {
+                "resume": {
+                    "skills": list[str],
+                    "projects": list[str],
+                    "experience": list[str],
+                },
+                "cover_letter": str,
+                "strengths": list[str],
+                "weaknesses": list[str],
+            }
+    """
+
     cleaned_text = _clean_json_response(text)
 
     try:
@@ -231,7 +329,54 @@ def _parse_materials_response(text: str) -> dict | None:
 
 
 def generate_application_materials(user_profile: dict, job_analysis: dict) -> dict:
-    """Generate structured resume content, cover letter, strengths, and weaknesses."""
+    """Generate structured resume content, cover letter, strengths, and weaknesses.
+
+    Parameters:
+        user_profile (dict): User profile data containing the user's contact
+        information, education information, skills, projects, and experience.
+
+        job_analysis (dict): Job analysis data containing the company name,
+        job title, required skills, and keywords.
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success:
+            {
+                "status": "success",
+                "data": {
+                    "resume": {
+                        "skills": list[str],
+                        "projects": list[str],
+                        "experience": list[str],
+                    },
+                    "cover_letter": str,
+                    "strengths": list[str],
+                    "weaknesses": list[str],
+                },
+            }
+
+        Failure:
+            {
+                "status": "incomplete_profile",
+                "message": "User profile is required before generating materials.",
+            }
+
+            {
+                "status": "missing_job_analysis",
+                "message": "Job analysis is required before generating materials.",
+            }
+
+            {
+                "status": "ai_error",
+                "message": "Could not generate application materials.",
+            }
+
+            {
+                "status": "generation_failed",
+                "message": "Could not understand the generated materials.",
+            }
+    """
 
     if not _is_valid_user_profile(user_profile):
         return {
@@ -277,7 +422,67 @@ def generate_materials_for_saved_records(
     application_id: int | str,
     save: bool = False,
 ) -> dict:
-    """Generate materials from saved user and job records."""
+    """Generate materials from saved user and job records.
+
+    Parameters:
+        user_id (int | str): ID of the saved user profile to retrieve from
+        storage.
+
+        application_id (int | str): ID of the saved job analysis to retrieve
+        from storage.
+
+        save (bool): True if the generated materials should be saved in
+        storage; otherwise, False.
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success without saving:
+            {
+                "status": "success",
+                "data": {
+                    "resume": {
+                        "skills": list[str],
+                        "projects": list[str],
+                        "experience": list[str],
+                    },
+                    "cover_letter": str,
+                    "strengths": list[str],
+                    "weaknesses": list[str],
+                },
+            }
+
+        Success with saving:
+            {
+                "status": "success",
+                "data": {
+                    "resume": {
+                        "skills": list[str],
+                        "projects": list[str],
+                        "experience": list[str],
+                    },
+                    "cover_letter": str,
+                    "strengths": list[str],
+                    "weaknesses": list[str],
+                },
+                "save_status": "success" | "exists" | "error",
+            }
+
+        Failure from retrieving saved records:
+            {
+                "status": "not_found",
+                "message": str,
+            }
+
+            {
+                "status": "error",
+                "message": str,
+            }
+
+        Failure from generating materials:
+            Returns the same failure payloads as
+            generate_application_materials().
+    """
 
     user_response = get_user_profile(user_id)
 

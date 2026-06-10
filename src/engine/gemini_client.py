@@ -12,6 +12,20 @@ closes the Gemini client after the request.
 
 This module should not parse application-specific JSON. Other engine
 modules are responsible for interpreting Gemini's text response.
+
+Environment variables:
+    GEMINI_API_KEY:
+        Required. API key used to authenticate with Gemini.
+
+    GEMINI_MODEL:
+        Optional. Gemini model name. If this variable is not set, the
+        module uses "gemini-2.5-flash".
+
+Error contract:
+    This module raises RuntimeError instead of returning response
+    dictionaries because it is a low-level API wrapper. Engine modules
+    catch these errors and convert them into user-facing status payloads
+    such as "ai_error".
 """
 
 from __future__ import annotations
@@ -28,11 +42,16 @@ def call_gemini(prompt: str) -> str:
         prompt (str): Prompt text sent to Gemini.
 
     Returns:
-        str: Non-empty response text returned by Gemini.
+        str: Non-empty raw response text returned by Gemini.
 
     Raises:
         RuntimeError: If GEMINI_API_KEY is missing or blank.
         RuntimeError: If Gemini returns an empty response.
+
+    Notes:
+        This function does not clean Markdown code fences, parse JSON, or
+        validate application-specific fields. The caller is responsible for
+        interpreting the returned text.
     """
 
     api_key = os.getenv("GEMINI_API_KEY")

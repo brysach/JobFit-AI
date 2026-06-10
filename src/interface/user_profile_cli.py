@@ -10,7 +10,14 @@ phone number, university, degree, skills, projects, and experience.
 It sends the structured profile data to the engine layer and displays
 the resulting success, cancellation, or error message.
 
-This module only handles terminal input and output.
+This module only handles terminal input and output. It does not access
+Google Sheets directly and does not generate AI content.
+
+Main status contract:
+    - "success": The user profile was saved successfully.
+    - "cancelled": The user returned to the main menu or chose not to save.
+    - "incomplete": The profile was missing required information.
+    - "storage_error": The profile could not be saved.
 """
 
 from __future__ import annotations
@@ -23,7 +30,19 @@ from src.interface.input_utils import print_back_instruction
 
 
 def _split_comma_separated_items(text: str) -> list[str]:
-    """Split comma-separated user input into a clean list."""
+    """Split comma-separated user input into a clean list.
+
+    Parameters:
+        text (str): User-entered text containing comma-separated values.
+
+    Returns:
+        list[str]: Cleaned list of non-empty items.
+
+        Example:
+            "Python, Git, SQL" becomes ["Python", "Git", "SQL"].
+
+        Empty items are ignored.
+    """
 
     items = []
 
@@ -37,9 +56,23 @@ def _split_comma_separated_items(text: str) -> list[str]:
 
 
 def _read_multiline_items() -> list[str] | None:
-    """Read multiline items until the user types END.
+    """Read multiline profile items until the user types END.
 
-    Return None if the user chooses to go back.
+    Parameters:
+        None.
+
+    Returns:
+        list[str] | None: List of entered items, or None if the user chooses
+        to return to the main menu.
+
+        Possible return values:
+            list[str]:
+                Non-empty lines entered by the user. The END line is not
+                included.
+
+            None:
+                The user entered a back command such as "BACK", "B", or
+                "MENU".
     """
 
     items = []
@@ -62,7 +95,22 @@ def _read_multiline_items() -> list[str] | None:
 
 
 def format_user_profile_response(response: dict) -> str:
-    """Format a user profile engine response for display."""
+    """Format a user profile engine response for terminal display.
+
+    Parameters:
+        response (dict): Response payload returned by save_user_profile().
+
+    Returns:
+        str: User-facing message for terminal display.
+
+        Possible return values:
+            If status is "success", returns:
+                "User profile saved successfully."
+
+            If status is not "success", returns the response message if one
+            exists; otherwise, returns:
+                "Something went wrong."
+    """
 
     status = response.get("status")
 
@@ -73,7 +121,49 @@ def format_user_profile_response(response: dict) -> str:
 
 
 def run_user_profile_flow() -> dict:
-    """Run the user profile option."""
+    """Run the user profile collection and save flow.
+
+    Parameters:
+        None.
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success:
+            {
+                "status": "success",
+                "save_status": "success",
+                "user_id": int,
+            }
+
+        Cancellation by back command:
+            {
+                "status": "cancelled",
+                "message": "Returned to main menu.",
+            }
+
+        Cancellation by save confirmation:
+            {
+                "status": "cancelled",
+                "message": "User profile was not saved.",
+            }
+
+        Validation failure:
+            {
+                "status": "incomplete",
+                "message": "User profile is missing required information.",
+            }
+
+        Storage failure:
+            {
+                "status": "storage_error",
+                "message": "Could not save user profile.",
+            }
+
+    Side effects:
+        Prints prompts to the terminal, reads user input, and prints the final
+        save or cancellation message.
+    """
 
     print()
     print("User Profile Management")

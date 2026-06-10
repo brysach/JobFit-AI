@@ -12,6 +12,17 @@ Python dictionaries.
 
 This module should not collect terminal input, call Gemini, or format
 user-facing output.
+
+Google Sheet tab:
+    jobsAnalysis
+
+Expected worksheet columns:
+    application_id | company_name | job_title | required_skills | keywords
+
+Main status contract:
+    - "success": The requested storage operation completed successfully.
+    - "not_found": A requested job analysis record was not found.
+    - "error": Required fields were missing or the Google Sheets operation failed.
 """
 
 from __future__ import annotations
@@ -28,7 +39,24 @@ REQUIRED_JOB_ANALYSIS_KEYS = {
 
 
 def _comma_string_to_list(value: object) -> list[str]:
-    """Convert a comma-separated string from Google Sheets into a list."""
+    """Convert a comma-separated Google Sheets value into a list.
+
+    Parameters:
+        value (object): Value read from a Google Sheets cell. The value is
+        usually a comma-separated string, but it may also be None or another
+        object that can be converted to a string.
+
+    Returns:
+        list[str]: Cleaned list of non-empty strings.
+
+        Possible return values:
+            list[str]:
+                A list containing each non-empty comma-separated item.
+
+            []:
+                Returned when value is None or when no non-empty items are
+                found.
+    """
 
     if value is None:
         return []
@@ -45,7 +73,23 @@ def _comma_string_to_list(value: object) -> list[str]:
 
 
 def _parse_existing_id(value: object) -> int | None:
-    """Convert an existing sheet ID into an int if possible."""
+    """Convert an existing sheet ID into an integer if possible.
+
+    Parameters:
+        value (object): Existing ID value read from Google Sheets. The value
+        may be an integer, a string, or a text-formatted sheet value with a
+        leading apostrophe.
+
+    Returns:
+        int | None: Parsed integer ID, or None if the value cannot be parsed.
+
+        Possible return values:
+            int:
+                The parsed numeric ID.
+
+            None:
+                The value could not be converted to an integer.
+    """
 
     text = str(value).strip().lstrip("'")
 
@@ -56,7 +100,15 @@ def _parse_existing_id(value: object) -> int | None:
 
 
 def _get_next_application_id(ws) -> int:
-    """Return the next application_id using max existing ID + 1."""
+    """Return the next available application ID.
+
+    Parameters:
+        ws (gspread.worksheet.Worksheet): jobsAnalysis worksheet object.
+
+    Returns:
+        int: Next application ID calculated as max existing numeric ID + 1.
+        If no numeric IDs exist, returns 1.
+    """
 
     existing_ids = ws.col_values(1)
     numeric_ids = []
@@ -74,7 +126,36 @@ def _get_next_application_id(ws) -> int:
 
 
 def save_job_analysis(job_analysis: dict) -> dict:
-    """Save analyzed job description data."""
+    """Save analyzed job description data.
+
+    Parameters:
+        job_analysis (dict): Job analysis record prepared by the engine layer.
+
+        Expected format:
+            {
+                "company_name": str,
+                "job_title": str,
+                "required_skills": list[str],
+                "keywords": list[str],
+            }
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success:
+            {
+                "status": "success",
+                "application_id": int,
+            }
+
+        Failure:
+            {
+                "status": "error",
+            }
+
+            The error status means required fields were missing or the Google
+            Sheets append operation failed.
+    """
 
     if not all(key in job_analysis for key in REQUIRED_JOB_ANALYSIS_KEYS):
         return {"status": "error"}
@@ -103,7 +184,36 @@ def save_job_analysis(job_analysis: dict) -> dict:
 
 
 def get_job_analysis(application_id: int | str) -> dict:
-    """Retrieve a saved job analysis by application_id."""
+    """Retrieve a saved job analysis by application ID.
+
+    Parameters:
+        application_id (int | str): Application ID of the saved job analysis
+        record to retrieve.
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success:
+            {
+                "status": "success",
+                "data": {
+                    "application_id": int | str,
+                    "company_name": str,
+                    "job_title": str,
+                    "required_skills": list[str],
+                    "keywords": list[str],
+                },
+            }
+
+        Failure:
+            {
+                "status": "not_found",
+                "message": "Job analysis record was not found.",
+            }
+
+            The not_found status is returned when no matching application ID
+            exists or when the Google Sheets read operation fails.
+    """
 
     try:
         ws = get_worksheet("jobsAnalysis")
@@ -138,7 +248,40 @@ def get_job_analysis(application_id: int | str) -> dict:
 
 
 def list_job_analyses() -> dict:
-    """Return all saved job analyses with their sheet row numbers."""
+    """Return all saved job analyses with their sheet row numbers.
+
+    Parameters:
+        None.
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success:
+            {
+                "status": "success",
+                "data": [
+                    {
+                        "row_number": int,
+                        "application_id": int | str,
+                        "company_name": str,
+                        "job_title": str,
+                        "required_skills": list[str],
+                        "keywords": list[str],
+                    }
+                ],
+            }
+
+        Failure:
+            {
+                "status": "error",
+                "message": "Could not retrieve job analyses.",
+            }
+
+        Notes:
+            The row_number value is the actual Google Sheets row number.
+            It is used internally for deletion and should not be treated as
+            the same thing as application_id.
+    """
 
     try:
         ws = get_worksheet("jobsAnalysis")
@@ -171,7 +314,29 @@ def list_job_analyses() -> dict:
 
 
 def delete_job_analysis_by_row(row_number: int) -> dict:
-    """Delete a job analysis by its Google Sheets row number."""
+    """Delete a job analysis by its Google Sheets row number.
+
+    Parameters:
+        row_number (int): Actual row number in the jobsAnalysis worksheet.
+        The header row is row 1, so valid deletable records must have row
+        number 2 or greater.
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success:
+            {
+                "status": "success",
+            }
+
+        Failure:
+            {
+                "status": "error",
+            }
+
+            The error status is returned if row_number is 1 or lower, or if
+            the Google Sheets delete operation fails.
+    """
 
     try:
         if row_number <= 1:

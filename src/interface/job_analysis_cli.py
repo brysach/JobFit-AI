@@ -12,6 +12,14 @@ display.
 
 This module does not call Gemini directly and does not access Google
 Sheets directly.
+
+Main status contract:
+    - "success": The job description was analyzed successfully.
+    - "cancelled": The user chose to return to the main menu.
+    - "incomplete": The job description was empty.
+    - "invalid_input": The input did not appear to describe a job.
+    - "ai_error": Gemini failed or returned unusable output.
+    - "storage_error": The analyzed job could not be saved.
 """
 
 from __future__ import annotations
@@ -25,6 +33,17 @@ from src.interface.input_utils import print_back_instruction
 
 
 def _format_list(title: str, items: list[str]) -> list[str]:
+    """Format a titled list for terminal display.
+
+    Parameters:
+        title (str): Heading shown above the list.
+        items (list[str]): Values to display as bullet items.
+
+    Returns:
+        list[str]: Formatted text lines. If items is empty, the returned
+        list contains one fallback bullet saying "- None found".
+    """
+
     lines = [f"{title}:"]
 
     if not items:
@@ -38,7 +57,27 @@ def _format_list(title: str, items: list[str]) -> list[str]:
 
 
 def format_analysis_response(response: dict) -> str:
-    """Convert an engine response into readable text for the user."""
+    """Convert an engine response into readable job analysis text.
+
+    Parameters:
+        response (dict): Response payload returned by the job analysis engine.
+
+    Returns:
+        str: User-facing text for terminal display.
+
+        Possible return values:
+            If status is "success", returns formatted job analysis text with:
+                - company name
+                - job title
+                - required skills
+                - preferred skills
+                - responsibilities
+                - keywords
+                - optional save status
+
+            If status is not "success", returns the response message if one
+            exists; otherwise, returns "Something went wrong.".
+    """
 
     status = response.get("status")
 
@@ -76,7 +115,21 @@ def format_analysis_response(response: dict) -> str:
 def _read_multiline_input() -> str | None:
     """Read multiline user input until the user types END.
 
-    Return None if the user chooses to go back.
+    Parameters:
+        None.
+
+    Returns:
+        str | None: Multiline text entered by the user, or None if the user
+        chooses to go back to the main menu.
+
+        Possible return values:
+            str:
+                All entered lines joined with newline characters. The END
+                line is not included.
+
+            None:
+                The user entered a back command such as "BACK", "B", or
+                "MENU".
     """
 
     lines = []
@@ -96,7 +149,54 @@ def _read_multiline_input() -> str | None:
 
 
 def run_job_analysis_flow() -> dict:
-    """Run the job description analysis option."""
+    """Run the job description analysis option.
+
+    Parameters:
+        None.
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success:
+            {
+                "status": "success",
+                "data": {
+                    "company_name": str,
+                    "job_title": str,
+                    "required_skills": list[str],
+                    "preferred_skills": list[str],
+                    "responsibilities": list[str],
+                    "keywords": list[str],
+                },
+            }
+
+        Success with saving:
+            {
+                "status": "success",
+                "data": {
+                    "company_name": str,
+                    "job_title": str,
+                    "required_skills": list[str],
+                    "preferred_skills": list[str],
+                    "responsibilities": list[str],
+                    "keywords": list[str],
+                },
+                "save_status": "success" | "error",
+            }
+
+        Cancellation:
+            {
+                "status": "cancelled",
+                "message": "Returned to main menu.",
+            }
+
+        Engine failure:
+            Returns the same failure payloads as analyze_job_description(),
+            including "incomplete", "invalid_input", and "ai_error".
+
+    Side effects:
+        Prints prompts and formatted output to the terminal.
+    """
 
     while True:
         print()

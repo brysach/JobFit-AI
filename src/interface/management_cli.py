@@ -11,6 +11,13 @@ and sends delete requests to the engine layer.
 
 The interface uses displayed list numbers instead of exposing backend
 row numbers directly to the user.
+
+Main status contract:
+    - "success": The selected saved record was deleted successfully.
+    - "cancelled": The user chose to return to the main menu or cancelled deletion.
+    - "invalid_selection": The user selected an invalid list entry.
+    - "not_found": No saved records were found.
+    - "error": The storage layer could not complete the requested operation.
 """
 
 from __future__ import annotations
@@ -25,6 +32,17 @@ from src.interface.input_utils import print_back_instruction
 
 
 def _format_list(title: str, items: list[str]) -> list[str]:
+    """Format a titled list for terminal display.
+
+    Parameters:
+        title (str): Heading shown above the list.
+        items (list[str]): Values to display as bullet items.
+
+    Returns:
+        list[str]: Formatted text lines. If items is empty, the returned
+        list contains one fallback bullet saying "- None".
+    """
+
     lines = [f"{title}:"]
 
     if not items:
@@ -38,6 +56,21 @@ def _format_list(title: str, items: list[str]) -> list[str]:
 
 
 def _invalid_selection_response() -> dict:
+    """Return a standard invalid-selection response payload.
+
+    Parameters:
+        None.
+
+    Returns:
+        dict: Standard invalid-selection response.
+
+        Return value:
+            {
+                "status": "invalid_selection",
+                "message": "Please choose a valid entry number.",
+            }
+    """
+
     return {
         "status": "invalid_selection",
         "message": "Please choose a valid entry number.",
@@ -45,7 +78,24 @@ def _invalid_selection_response() -> dict:
 
 
 def _get_selected_entry(entries: list[dict], selection: str) -> dict | None:
-    """Return the selected entry using the displayed list number."""
+    """Return the selected entry using the displayed list number.
+
+    Parameters:
+        entries (list[dict]): Saved records displayed to the user.
+        selection (str): User-entered list number.
+
+    Returns:
+        dict | None: The selected dictionary from entries, or None if the
+        selection is not a valid integer within the displayed range.
+
+        Possible return values:
+            dict:
+                The selected saved record.
+
+            None:
+                The selection could not be converted to an integer, or the
+                selected number was outside the valid range.
+    """
 
     try:
         selected_index = int(selection)
@@ -59,7 +109,25 @@ def _get_selected_entry(entries: list[dict], selection: str) -> dict | None:
 
 
 def format_user_profiles_summary_response(response: dict) -> str:
-    """Format saved user profiles as a short numbered list."""
+    """Format saved user profiles as a short numbered list.
+
+    Parameters:
+        response (dict): Response payload returned by list_user_profiles().
+
+    Returns:
+        str: User-facing text for terminal display.
+
+        Possible return values:
+            If status is "success" and profiles exist, returns a numbered
+            list using this format:
+                1. Name | University | Degree
+
+            If status is "success" but the list is empty, returns:
+                "No user profiles were found."
+
+            If status is not "success", returns the response message if one
+            exists; otherwise, returns "Could not retrieve user profiles.".
+    """
 
     if response.get("status") != "success":
         return response.get("message", "Could not retrieve user profiles.")
@@ -84,7 +152,25 @@ def format_user_profiles_summary_response(response: dict) -> str:
 
 
 def format_job_analyses_summary_response(response: dict) -> str:
-    """Format saved job analyses as a short numbered list."""
+    """Format saved job analyses as a short numbered list.
+
+    Parameters:
+        response (dict): Response payload returned by list_job_analyses().
+
+    Returns:
+        str: User-facing text for terminal display.
+
+        Possible return values:
+            If status is "success" and jobs exist, returns a numbered list
+            using this format:
+                1. Company Name | Job Title
+
+            If status is "success" but the list is empty, returns:
+                "No job analyses were found."
+
+            If status is not "success", returns the response message if one
+            exists; otherwise, returns "Could not retrieve job analyses.".
+    """
 
     if response.get("status") != "success":
         return response.get("message", "Could not retrieve job analyses.")
@@ -108,7 +194,27 @@ def format_job_analyses_summary_response(response: dict) -> str:
 
 
 def format_user_profile_details(profile: dict) -> str:
-    """Format one complete user profile after it is selected."""
+    """Format one complete user profile after it is selected.
+
+    Parameters:
+        profile (dict): Selected user profile record.
+
+        Expected format:
+            {
+                "name": str,
+                "email": str,
+                "phone_number": str,
+                "university": str,
+                "degree": str,
+                "skills": list[str],
+                "projects": list[str],
+                "experience": list[str],
+            }
+
+    Returns:
+        str: User-facing text containing the selected profile's contact
+        information, education information, skills, projects, and experience.
+    """
 
     lines = [
         "Selected User Profile",
@@ -133,7 +239,23 @@ def format_user_profile_details(profile: dict) -> str:
 
 
 def format_job_analysis_details(job: dict) -> str:
-    """Format one complete job analysis after it is selected."""
+    """Format one complete job analysis after it is selected.
+
+    Parameters:
+        job (dict): Selected job analysis record.
+
+        Expected format:
+            {
+                "company_name": str,
+                "job_title": str,
+                "required_skills": list[str],
+                "keywords": list[str],
+            }
+
+    Returns:
+        str: User-facing text containing the selected job's company name,
+        job title, required skills, and keywords.
+    """
 
     lines = [
         "Selected Job Analysis",
@@ -152,7 +274,54 @@ def format_job_analysis_details(job: dict) -> str:
 
 
 def run_manage_users_flow() -> dict:
-    """Show saved users, show selected details, and delete after confirmation."""
+    """Show saved users, show selected details, and delete after confirmation.
+
+    Parameters:
+        None.
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success:
+            {
+                "status": "success",
+                "message": "User profile deleted successfully.",
+            }
+
+        Cancellation by back command:
+            {
+                "status": "cancelled",
+                "message": "Returned to main menu.",
+            }
+
+        Cancellation by delete confirmation:
+            {
+                "status": "cancelled",
+                "message": "Delete cancelled.",
+            }
+
+        Invalid selection:
+            {
+                "status": "invalid_selection",
+                "message": "Please choose a valid entry number.",
+            }
+
+        No saved profiles:
+            {
+                "status": "not_found",
+                "message": "No user profiles were found.",
+            }
+
+        Storage failure:
+            {
+                "status": "error",
+                "message": str,
+            }
+
+    Side effects:
+        Prints saved profile summaries, selected profile details, prompts,
+        and delete status messages to the terminal.
+    """
 
     print()
     print_back_instruction()
@@ -211,7 +380,54 @@ def run_manage_users_flow() -> dict:
 
 
 def run_manage_jobs_flow() -> dict:
-    """Show saved jobs, show selected details, and delete after confirmation."""
+    """Show saved jobs, show selected details, and delete after confirmation.
+
+    Parameters:
+        None.
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success:
+            {
+                "status": "success",
+                "message": "Job analysis deleted successfully.",
+            }
+
+        Cancellation by back command:
+            {
+                "status": "cancelled",
+                "message": "Returned to main menu.",
+            }
+
+        Cancellation by delete confirmation:
+            {
+                "status": "cancelled",
+                "message": "Delete cancelled.",
+            }
+
+        Invalid selection:
+            {
+                "status": "invalid_selection",
+                "message": "Please choose a valid entry number.",
+            }
+
+        No saved jobs:
+            {
+                "status": "not_found",
+                "message": "No job analyses were found.",
+            }
+
+        Storage failure:
+            {
+                "status": "error",
+                "message": str,
+            }
+
+    Side effects:
+        Prints saved job summaries, selected job details, prompts, and delete
+        status messages to the terminal.
+    """
 
     print()
     print_back_instruction()

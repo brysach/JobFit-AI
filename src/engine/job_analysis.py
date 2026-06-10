@@ -13,6 +13,15 @@ to the storage layer.
 This module does not read terminal input and does not directly format
 terminal output. It returns response dictionaries with a "status" field
 so the interface layer can decide what to display.
+
+Main status contract:
+    - "success": The job description was analyzed or saved successfully.
+    - "incomplete": The job description was empty.
+    - "invalid_input": The input did not appear to describe a job.
+    - "ai_error": Gemini failed or returned unusable output.
+    - "storage_error": The job analysis could not be saved or deleted.
+    - "not_found": No saved job analyses were found.
+    - "invalid_selection": The user selected an invalid list entry.
 """
 
 from __future__ import annotations
@@ -20,9 +29,10 @@ from __future__ import annotations
 import json
 
 from src.engine.gemini_client import call_gemini
-from src.storage.job_analysis_storage import save_job_analysis
 from src.storage.job_analysis_storage import delete_job_analysis_by_row
 from src.storage.job_analysis_storage import list_job_analyses as list_job_analysis_records
+from src.storage.job_analysis_storage import save_job_analysis
+
 
 REQUIRED_ANALYSIS_KEYS = {
     "company_name",
@@ -53,7 +63,15 @@ Job description:
 
 
 def _looks_like_job_description(text: str) -> bool:
-    """Return True if the text appears to describe a job."""
+    """Return True if the text appears to describe a job.
+
+    Parameters:
+        text (str): Raw text entered by the user.
+
+    Returns:
+        bool: True if the text contains common job-description terms;
+        otherwise, False.
+    """
 
     lowered = text.lower()
 
@@ -75,7 +93,15 @@ def _looks_like_job_description(text: str) -> bool:
 
 
 def _clean_json_response(response_text: str) -> str:
-    """Remove Markdown code fences from Gemini JSON output."""
+    """Remove Markdown code fences from Gemini JSON output.
+
+    Parameters:
+        response_text (str): Raw Gemini response text.
+
+    Returns:
+        str: Cleaned response text with surrounding Markdown code fences
+        removed when they are present.
+    """
 
     text = response_text.strip()
 
@@ -92,7 +118,25 @@ def _clean_json_response(response_text: str) -> str:
 
 
 def _parse_analysis_response(response_text: str) -> dict | None:
-    """Parse and validate Gemini's JSON response."""
+    """Parse and validate Gemini's JSON job analysis response.
+
+    Parameters:
+        response_text (str): Raw Gemini response text.
+
+    Returns:
+        dict | None: A validated job analysis dictionary if Gemini returned
+        usable JSON with all required fields; otherwise, None.
+
+        Successful dictionary format:
+            {
+                "company_name": str,
+                "job_title": str,
+                "required_skills": list,
+                "preferred_skills": list,
+                "responsibilities": list,
+                "keywords": list,
+            }
+    """
 
     cleaned_text = _clean_json_response(response_text)
 
@@ -127,7 +171,43 @@ def _parse_analysis_response(response_text: str) -> dict | None:
 
 
 def analyze_job_description(job_description: str) -> dict:
-    """Analyze a job description and return structured data."""
+    """Analyze a job description and return structured job data.
+
+    Parameters:
+        job_description (str): Raw job posting text entered by the user.
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success:
+            {
+                "status": "success",
+                "data": {
+                    "company_name": str,
+                    "job_title": str,
+                    "required_skills": list[str],
+                    "preferred_skills": list[str],
+                    "responsibilities": list[str],
+                    "keywords": list[str],
+                },
+            }
+
+        Failure:
+            {
+                "status": "incomplete",
+                "message": "Job description is required.",
+            }
+
+            {
+                "status": "invalid_input",
+                "message": "Input does not appear to be a job description.",
+            }
+
+            {
+                "status": "ai_error",
+                "message": "Could not analyze job description.",
+            }
+    """
 
     if not job_description or not job_description.strip():
         return {
@@ -164,12 +244,63 @@ def analyze_job_description(job_description: str) -> dict:
         "data": data,
     }
 
+
 def analyze_and_optionally_save(
     job_description: str,
     application_id: int | str | None = None,
     save: bool = False,
 ) -> dict:
-    """Analyze a job description and optionally save the result."""
+    """Analyze a job description and optionally save the result.
+
+    Parameters:
+        job_description (str): Raw job posting text entered by the user.
+        application_id (int | str | None): Optional application ID value.
+            This parameter is accepted for compatibility with the contract,
+            but new saved records generate their own ID in storage.
+        save (bool): True if the analyzed job description should be saved;
+            otherwise, False.
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success without saving:
+            {
+                "status": "success",
+                "data": {
+                    "company_name": str,
+                    "job_title": str,
+                    "required_skills": list[str],
+                    "preferred_skills": list[str],
+                    "responsibilities": list[str],
+                    "keywords": list[str],
+                },
+            }
+
+        Success with saving:
+            {
+                "status": "success",
+                "data": {
+                    "company_name": str,
+                    "job_title": str,
+                    "required_skills": list[str],
+                    "preferred_skills": list[str],
+                    "responsibilities": list[str],
+                    "keywords": list[str],
+                },
+                "save_status": "success",
+                "application_id": int,
+            }
+
+        Save failure after successful analysis:
+            {
+                "status": "success",
+                "data": dict,
+                "save_status": "error",
+            }
+
+        Analysis failure:
+            Returns the same failure payloads as analyze_job_description().
+    """
 
     response = analyze_job_description(job_description)
 
@@ -187,6 +318,7 @@ def analyze_and_optionally_save(
         "required_skills": data["required_skills"],
         "keywords": data["keywords"],
     }
+
     save_response = save_job_analysis(job_analysis)
 
     response["save_status"] = save_response.get("status", "error")
@@ -196,8 +328,40 @@ def analyze_and_optionally_save(
 
     return response
 
+
 def save_existing_job_analysis(analysis_data: dict) -> dict:
-    """Save an already generated job analysis."""
+    """Save an already generated job analysis.
+
+    Parameters:
+        analysis_data (dict): Structured job analysis produced by
+        analyze_job_description().
+
+        Expected format:
+            {
+                "company_name": str,
+                "job_title": str,
+                "required_skills": list[str],
+                "preferred_skills": list[str],
+                "responsibilities": list[str],
+                "keywords": list[str],
+            }
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success:
+            {
+                "status": "success",
+                "save_status": "success",
+                "application_id": int,
+            }
+
+        Failure:
+            {
+                "status": "storage_error",
+                "message": "Could not save job analysis.",
+            }
+    """
 
     if not isinstance(analysis_data, dict):
         return {
@@ -238,14 +402,83 @@ def save_existing_job_analysis(analysis_data: dict) -> dict:
         "message": "Could not save job analysis.",
     }
 
+
 def list_job_analyses() -> dict:
-    """Return all saved job analyses."""
+    """Return all saved job analyses.
+
+    Parameters:
+        None.
+
+    Returns:
+        dict: Response payload returned by the storage layer.
+
+        Success:
+            {
+                "status": "success",
+                "data": [
+                    {
+                        "row_number": int,
+                        "application_id": int | str,
+                        "company_name": str,
+                        "job_title": str,
+                        "required_skills": list[str],
+                        "keywords": list[str],
+                    }
+                ],
+            }
+
+        Failure:
+            {
+                "status": "not_found",
+                "message": "No job analyses were found.",
+            }
+
+            {
+                "status": "error",
+                "message": str,
+            }
+    """
 
     return list_job_analysis_records()
 
 
 def delete_job_analysis_by_index(entry_number: int | str) -> dict:
-    """Delete a saved job analysis by the displayed list number."""
+    """Delete a saved job analysis by the displayed list number.
+
+    Parameters:
+        entry_number (int | str): The list number displayed to the user
+        in the interface layer.
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success:
+            {
+                "status": "success",
+                "message": "Job analysis deleted successfully.",
+            }
+
+        Failure:
+            {
+                "status": "invalid_selection",
+                "message": "Please choose a valid entry number.",
+            }
+
+            {
+                "status": "not_found",
+                "message": "No job analyses were found.",
+            }
+
+            {
+                "status": "storage_error",
+                "message": "Could not retrieve job analyses.",
+            }
+
+            {
+                "status": "storage_error",
+                "message": "Could not delete job analysis.",
+            }
+    """
 
     try:
         selected_index = int(entry_number)

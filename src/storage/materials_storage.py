@@ -1,4 +1,5 @@
 # src/storage/materials_storage.py
+
 """Storage layer for generated application materials.
 
 Architecture position:
@@ -11,6 +12,19 @@ combination.
 
 This module does not generate AI content and does not format terminal
 output.
+
+Google Sheet tab:
+    generatedMaterials
+
+Expected worksheet columns:
+    application_id | user_id | resume_skills | resume_projects |
+    resume_experience | cover_letter | strengths | weaknesses
+
+Main status contract:
+    - "success": Generated materials were saved or retrieved successfully.
+    - "exists": Generated materials already exist for the same user and job.
+    - "not_found": No generated materials matched the requested IDs.
+    - "error": Required fields were missing or the Google Sheets operation failed.
 """
 
 from __future__ import annotations
@@ -33,10 +47,42 @@ REQUIRED_GENERATED_MATERIALS_KEYS = {
 
 
 def _get_generated_materials_worksheet():
+    """Return the generatedMaterials worksheet.
+
+    Parameters:
+        None.
+
+    Returns:
+        gspread.worksheet.Worksheet: Google Sheets worksheet object for the
+        generatedMaterials tab.
+
+    Raises:
+        Exception: If the worksheet cannot be opened.
+    """
+
     return get_worksheet("generatedMaterials")
 
 
 def _json_to_list(value: object) -> list[str]:
+    """Convert a stored JSON value into a list of strings.
+
+    Parameters:
+        value (object): Value read from Google Sheets. This is expected to be
+        a JSON-encoded list, but it may be another value if the sheet data is
+        malformed.
+
+    Returns:
+        list[str]: Parsed list of string values.
+
+        Possible return values:
+            list[str]:
+                Returned when value contains a valid JSON list.
+
+            []:
+                Returned when value is not valid JSON, when value cannot be
+                parsed, or when the parsed JSON value is not a list.
+    """
+
     if not isinstance(value, str):
         value = str(value)
 
@@ -52,11 +98,55 @@ def _json_to_list(value: object) -> list[str]:
 
 
 def _ids_match(left: object, right: object) -> bool:
+    """Compare two backend IDs after normalizing their text form.
+
+    Parameters:
+        left (object): First ID value to compare.
+        right (object): Second ID value to compare.
+
+    Returns:
+        bool: True if both IDs match after converting to strings, removing
+        surrounding whitespace, and removing a leading apostrophe used by
+        Google Sheets text formatting; otherwise, False.
+    """
+
     return str(left).strip().lstrip("'") == str(right).strip().lstrip("'")
 
 
 def save_generated_materials(materials: dict) -> str:
-    """Save generated resume, cover letter, strengths, and weaknesses."""
+    """Save generated resume, cover letter, strengths, and weaknesses.
+
+    Parameters:
+        materials (dict): Generated materials record prepared by the engine
+        layer.
+
+        Expected format:
+            {
+                "application_id": int | str,
+                "user_id": int | str,
+                "resume_skills": list[str],
+                "resume_projects": list[str],
+                "resume_experience": list[str],
+                "cover_letter": str,
+                "strengths": list[str],
+                "weaknesses": list[str],
+            }
+
+    Returns:
+        str: Save status.
+
+        Possible return values:
+            "success":
+                The generated materials were saved successfully.
+
+            "exists":
+                A generated materials record already exists for the same
+                application_id and user_id.
+
+            "error":
+                The input was invalid, required keys were missing, or the
+                Google Sheets operation failed.
+    """
 
     if not isinstance(materials, dict):
         return "error"
@@ -103,7 +193,52 @@ def get_generated_materials(
     application_id: int | str,
     user_id: int | str | None = None,
 ) -> dict:
-    """Retrieve generated materials by application_id and optional user_id."""
+    """Retrieve generated materials by application ID and optional user ID.
+
+    Parameters:
+        application_id (int | str): Application ID of the saved generated
+        materials record.
+
+        user_id (int | str | None): Optional user ID used to narrow the search.
+        If None, the first record matching application_id is returned.
+
+    Returns:
+        dict: Response payload with one of these possible statuses:
+
+        Success:
+            {
+                "status": "success",
+                "data": {
+                    "application_id": int | str,
+                    "user_id": int | str,
+                    "resume": {
+                        "skills": list[str],
+                        "projects": list[str],
+                        "experience": list[str],
+                    },
+                    "cover_letter": str,
+                    "strengths": list[str],
+                    "weaknesses": list[str],
+                },
+            }
+
+        Not found:
+            {
+                "status": "not_found",
+                "message": "Generated materials were not found.",
+            }
+
+        Storage failure:
+            {
+                "status": "error",
+                "message": "Could not retrieve generated materials.",
+            }
+
+    Notes:
+        The resume_skills, resume_projects, resume_experience, strengths,
+        and weaknesses fields are stored as JSON strings in Google Sheets and
+        converted back into Python lists before being returned.
+    """
 
     try:
         ws = _get_generated_materials_worksheet()
