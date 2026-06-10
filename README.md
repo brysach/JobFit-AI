@@ -22,7 +22,7 @@ The interface layer handles terminal input and output. The engine layer validate
 | `FUNCTIONALITY.md` | Requirement specification                               |
 | `CONTRACT.md`      | Design document with component contracts and data types |
 | `requirements.txt` | Python dependencies                                     |
-| `outputs/`         | Generated `.docx` application materials                 |
+| `docs/`            | HTML docs with functions descriptions                      |
 
 ## Demo Video
 
