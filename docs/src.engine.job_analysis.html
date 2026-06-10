@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.engine.job_analysis</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.engine.html" class="white">engine</a>.job_analysis</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cengine%5Cjob_analysis.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\engine\job_analysis.py</a></td></tr></table>
+    <p><span class="code">Engine&nbsp;layer&nbsp;for&nbsp;analyzing&nbsp;job&nbsp;descriptions.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;-&gt;&nbsp;engine&nbsp;-&gt;&nbsp;storage<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;receives&nbsp;a&nbsp;raw&nbsp;job&nbsp;description&nbsp;from&nbsp;the&nbsp;interface&nbsp;layer,<br>
+uses&nbsp;Gemini&nbsp;to&nbsp;extract&nbsp;structured&nbsp;job&nbsp;information,&nbsp;validates&nbsp;the<br>
+generated&nbsp;response,&nbsp;and&nbsp;optionally&nbsp;sends&nbsp;the&nbsp;saved&nbsp;job&nbsp;analysis&nbsp;record<br>
+to&nbsp;the&nbsp;storage&nbsp;layer.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;does&nbsp;not&nbsp;read&nbsp;terminal&nbsp;input&nbsp;and&nbsp;does&nbsp;not&nbsp;directly&nbsp;format<br>
+terminal&nbsp;output.&nbsp;It&nbsp;returns&nbsp;response&nbsp;dictionaries&nbsp;with&nbsp;a&nbsp;"status"&nbsp;field<br>
+so&nbsp;the&nbsp;interface&nbsp;layer&nbsp;can&nbsp;decide&nbsp;what&nbsp;to&nbsp;display.</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="json.html">json</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-analyze_and_optionally_save"><strong>analyze_and_optionally_save</strong></a>(
+    job_description: str,
+    application_id: int | str | None = None,
+    save: bool = False
+) -&gt; dict</dt><dd><span class="code">Analyze&nbsp;a&nbsp;job&nbsp;description&nbsp;and&nbsp;optionally&nbsp;save&nbsp;the&nbsp;result.</span></dd></dl>
+ <dl><dt><a name="-analyze_job_description"><strong>analyze_job_description</strong></a>(job_description: str) -&gt; dict</dt><dd><span class="code">Analyze&nbsp;a&nbsp;job&nbsp;description&nbsp;and&nbsp;return&nbsp;structured&nbsp;data.</span></dd></dl>
+ <dl><dt><a name="-delete_job_analysis_by_index"><strong>delete_job_analysis_by_index</strong></a>(entry_number: int | str) -&gt; dict</dt><dd><span class="code">Delete&nbsp;a&nbsp;saved&nbsp;job&nbsp;analysis&nbsp;by&nbsp;the&nbsp;displayed&nbsp;list&nbsp;number.</span></dd></dl>
+ <dl><dt><a name="-list_job_analyses"><strong>list_job_analyses</strong></a>() -&gt; dict</dt><dd><span class="code">Return&nbsp;all&nbsp;saved&nbsp;job&nbsp;analyses.</span></dd></dl>
+ <dl><dt><a name="-save_existing_job_analysis"><strong>save_existing_job_analysis</strong></a>(analysis_data: dict) -&gt; dict</dt><dd><span class="code">Save&nbsp;an&nbsp;already&nbsp;generated&nbsp;job&nbsp;analysis.</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>REQUIRED_ANALYSIS_KEYS</strong> = {'company_name', 'job_title', 'keywords', 'preferred_skills', 'required_skills', 'responsibilities'}</td></tr></table>
+</body></html>

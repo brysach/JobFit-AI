@@ -1,4 +1,16 @@
 # src/storage/user_profile_storage.py
+"""Storage layer for saved user profiles.
+
+Architecture position:
+    engine -> storage -> Google Sheets
+
+This module stores, retrieves, lists, and deletes user profile records
+in the usersProfile worksheet. It is responsible for assigning new
+user IDs and converting list fields such as skills, projects, and
+experience between JSON strings and Python lists.
+
+This module should only handle persistence behavior.
+"""
 
 from __future__ import annotations
 

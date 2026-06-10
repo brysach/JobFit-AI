@@ -1,5 +1,20 @@
 # src/engine/job_analysis.py
 
+"""Engine layer for analyzing job descriptions.
+
+Architecture position:
+    interface -> engine -> storage
+
+This module receives a raw job description from the interface layer,
+uses Gemini to extract structured job information, validates the
+generated response, and optionally sends the saved job analysis record
+to the storage layer.
+
+This module does not read terminal input and does not directly format
+terminal output. It returns response dictionaries with a "status" field
+so the interface layer can decide what to display.
+"""
+
 from __future__ import annotations
 
 import json

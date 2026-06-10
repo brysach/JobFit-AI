@@ -1,5 +1,22 @@
 # src/engine/materials.py
 
+"""Engine layer for generating application materials.
+
+Architecture position:
+    interface -> engine -> storage
+              -> export
+
+This module retrieves saved user profiles and job analyses, validates
+that both records contain the required fields, asks Gemini to generate
+tailored application materials, and optionally saves the generated
+materials through the storage layer.
+
+Generated materials include structured resume sections, a cover letter,
+strengths for the target job, and weaknesses with preparation advice.
+The module returns response dictionaries with a "status" field instead
+of printing output directly.
+"""
+
 from __future__ import annotations
 
 import json

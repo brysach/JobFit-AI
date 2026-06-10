@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.engine.materials</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.engine.html" class="white">engine</a>.materials</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cengine%5Cmaterials.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\engine\materials.py</a></td></tr></table>
+    <p><span class="code">Engine&nbsp;layer&nbsp;for&nbsp;generating&nbsp;application&nbsp;materials.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;-&gt;&nbsp;engine&nbsp;-&gt;&nbsp;storage<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;export<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;retrieves&nbsp;saved&nbsp;user&nbsp;profiles&nbsp;and&nbsp;job&nbsp;analyses,&nbsp;validates<br>
+that&nbsp;both&nbsp;records&nbsp;contain&nbsp;the&nbsp;required&nbsp;fields,&nbsp;asks&nbsp;Gemini&nbsp;to&nbsp;generate<br>
+tailored&nbsp;application&nbsp;materials,&nbsp;and&nbsp;optionally&nbsp;saves&nbsp;the&nbsp;generated<br>
+materials&nbsp;through&nbsp;the&nbsp;storage&nbsp;layer.<br>
+&nbsp;<br>
+Generated&nbsp;materials&nbsp;include&nbsp;structured&nbsp;resume&nbsp;sections,&nbsp;a&nbsp;cover&nbsp;letter,<br>
+strengths&nbsp;for&nbsp;the&nbsp;target&nbsp;job,&nbsp;and&nbsp;weaknesses&nbsp;with&nbsp;preparation&nbsp;advice.<br>
+The&nbsp;module&nbsp;returns&nbsp;response&nbsp;dictionaries&nbsp;with&nbsp;a&nbsp;"status"&nbsp;field&nbsp;instead<br>
+of&nbsp;printing&nbsp;output&nbsp;directly.</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="json.html">json</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-generate_application_materials"><strong>generate_application_materials</strong></a>(user_profile: dict, job_analysis: dict) -&gt; dict</dt><dd><span class="code">Generate&nbsp;structured&nbsp;resume&nbsp;content,&nbsp;cover&nbsp;letter,&nbsp;strengths,&nbsp;and&nbsp;weaknesses.</span></dd></dl>
+ <dl><dt><a name="-generate_materials_for_saved_records"><strong>generate_materials_for_saved_records</strong></a>(
+    user_id: int | str,
+    application_id: int | str,
+    save: bool = False
+) -&gt; dict</dt><dd><span class="code">Generate&nbsp;materials&nbsp;from&nbsp;saved&nbsp;user&nbsp;and&nbsp;job&nbsp;records.</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>REQUIRED_JOB_ANALYSIS_KEYS</strong> = {'company_name', 'job_title', 'keywords', 'required_skills'}<br>
+<strong>REQUIRED_MATERIALS_KEYS</strong> = {'cover_letter', 'resume', 'strengths', 'weaknesses'}<br>
+<strong>REQUIRED_USER_PROFILE_KEYS</strong> = {'degree', 'email', 'experience', 'name', 'phone_number', 'projects', ...}</td></tr></table>
+</body></html>

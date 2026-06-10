@@ -1,5 +1,19 @@
 # src/interface/job_analysis_cli.py
 
+"""Command-line flow for job description analysis.
+
+Architecture position:
+    interface -> engine -> storage
+
+This module collects a pasted job description from the user, asks
+whether the user wants to generate and save the analysis, calls the
+engine layer, and formats the generated job analysis for terminal
+display.
+
+This module does not call Gemini directly and does not access Google
+Sheets directly.
+"""
+
 from __future__ import annotations
 
 from src.engine.job_analysis import analyze_job_description

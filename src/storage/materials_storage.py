@@ -1,4 +1,17 @@
 # src/storage/materials_storage.py
+"""Storage layer for generated application materials.
+
+Architecture position:
+    engine -> storage -> Google Sheets
+
+This module stores and retrieves generated resume sections, cover
+letters, strengths, and weaknesses in the generatedMaterials worksheet.
+It prevents duplicate saved materials for the same user and job
+combination.
+
+This module does not generate AI content and does not format terminal
+output.
+"""
 
 from __future__ import annotations
 

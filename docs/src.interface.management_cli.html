@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.interface.management_cli</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.interface.html" class="white">interface</a>.management_cli</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cinterface%5Cmanagement_cli.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\interface\management_cli.py</a></td></tr></table>
+    <p><span class="code">Command-line&nbsp;flows&nbsp;for&nbsp;managing&nbsp;saved&nbsp;records.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;-&gt;&nbsp;engine&nbsp;-&gt;&nbsp;storage<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;displays&nbsp;saved&nbsp;user&nbsp;profiles&nbsp;and&nbsp;saved&nbsp;job&nbsp;analyses,<br>
+shows&nbsp;full&nbsp;details&nbsp;for&nbsp;selected&nbsp;records,&nbsp;asks&nbsp;for&nbsp;deletion&nbsp;confirmation,<br>
+and&nbsp;sends&nbsp;delete&nbsp;requests&nbsp;to&nbsp;the&nbsp;engine&nbsp;layer.<br>
+&nbsp;<br>
+The&nbsp;interface&nbsp;uses&nbsp;displayed&nbsp;list&nbsp;numbers&nbsp;instead&nbsp;of&nbsp;exposing&nbsp;backend<br>
+row&nbsp;numbers&nbsp;directly&nbsp;to&nbsp;the&nbsp;user.</span></p>
+<p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-format_job_analyses_summary_response"><strong>format_job_analyses_summary_response</strong></a>(response: dict) -&gt; str</dt><dd><span class="code">Format&nbsp;saved&nbsp;job&nbsp;analyses&nbsp;as&nbsp;a&nbsp;short&nbsp;numbered&nbsp;list.</span></dd></dl>
+ <dl><dt><a name="-format_job_analysis_details"><strong>format_job_analysis_details</strong></a>(job: dict) -&gt; str</dt><dd><span class="code">Format&nbsp;one&nbsp;complete&nbsp;job&nbsp;analysis&nbsp;after&nbsp;it&nbsp;is&nbsp;selected.</span></dd></dl>
+ <dl><dt><a name="-format_user_profile_details"><strong>format_user_profile_details</strong></a>(profile: dict) -&gt; str</dt><dd><span class="code">Format&nbsp;one&nbsp;complete&nbsp;user&nbsp;profile&nbsp;after&nbsp;it&nbsp;is&nbsp;selected.</span></dd></dl>
+ <dl><dt><a name="-format_user_profiles_summary_response"><strong>format_user_profiles_summary_response</strong></a>(response: dict) -&gt; str</dt><dd><span class="code">Format&nbsp;saved&nbsp;user&nbsp;profiles&nbsp;as&nbsp;a&nbsp;short&nbsp;numbered&nbsp;list.</span></dd></dl>
+ <dl><dt><a name="-run_manage_jobs_flow"><strong>run_manage_jobs_flow</strong></a>() -&gt; dict</dt><dd><span class="code">Show&nbsp;saved&nbsp;jobs,&nbsp;show&nbsp;selected&nbsp;details,&nbsp;and&nbsp;delete&nbsp;after&nbsp;confirmation.</span></dd></dl>
+ <dl><dt><a name="-run_manage_users_flow"><strong>run_manage_users_flow</strong></a>() -&gt; dict</dt><dd><span class="code">Show&nbsp;saved&nbsp;users,&nbsp;show&nbsp;selected&nbsp;details,&nbsp;and&nbsp;delete&nbsp;after&nbsp;confirmation.</span></dd></dl>
+</td></tr></table>
+</body></html>

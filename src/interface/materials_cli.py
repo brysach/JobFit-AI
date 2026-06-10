@@ -1,5 +1,20 @@
 # src/interface/materials_cli.py
 
+"""Command-line flow for resume and cover letter generation.
+
+Architecture position:
+    interface -> engine -> storage
+    interface -> export
+
+This module lets the user select a saved user profile and a saved job
+analysis, confirms both selections, requests generated materials from
+the engine layer, and optionally exports the generated content to a
+.docx file.
+
+The module handles user prompts and formatted terminal output. It does
+not call Gemini directly and does not access Google Sheets directly.
+"""
+
 from __future__ import annotations
 
 from src.engine.job_analysis import list_job_analyses

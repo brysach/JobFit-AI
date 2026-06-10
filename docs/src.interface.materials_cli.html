@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.interface.materials_cli</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.interface.html" class="white">interface</a>.materials_cli</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cinterface%5Cmaterials_cli.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\interface\materials_cli.py</a></td></tr></table>
+    <p><span class="code">Command-line&nbsp;flow&nbsp;for&nbsp;resume&nbsp;and&nbsp;cover&nbsp;letter&nbsp;generation.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;-&gt;&nbsp;engine&nbsp;-&gt;&nbsp;storage<br>
+&nbsp;&nbsp;&nbsp;&nbsp;interface&nbsp;-&gt;&nbsp;export<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;lets&nbsp;the&nbsp;user&nbsp;select&nbsp;a&nbsp;saved&nbsp;user&nbsp;profile&nbsp;and&nbsp;a&nbsp;saved&nbsp;job<br>
+analysis,&nbsp;confirms&nbsp;both&nbsp;selections,&nbsp;requests&nbsp;generated&nbsp;materials&nbsp;from<br>
+the&nbsp;engine&nbsp;layer,&nbsp;and&nbsp;optionally&nbsp;exports&nbsp;the&nbsp;generated&nbsp;content&nbsp;to&nbsp;a<br>
+.docx&nbsp;file.<br>
+&nbsp;<br>
+The&nbsp;module&nbsp;handles&nbsp;user&nbsp;prompts&nbsp;and&nbsp;formatted&nbsp;terminal&nbsp;output.&nbsp;It&nbsp;does<br>
+not&nbsp;call&nbsp;Gemini&nbsp;directly&nbsp;and&nbsp;does&nbsp;not&nbsp;access&nbsp;Google&nbsp;Sheets&nbsp;directly.</span></p>
+<p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-format_materials_response"><strong>format_materials_response</strong></a>(response: dict) -&gt; str</dt><dd><span class="code">Format&nbsp;generated&nbsp;resume,&nbsp;cover&nbsp;letter,&nbsp;strengths,&nbsp;and&nbsp;weaknesses.</span></dd></dl>
+ <dl><dt><a name="-run_resume_generation_flow"><strong>run_resume_generation_flow</strong></a>() -&gt; dict</dt><dd><span class="code">Run&nbsp;the&nbsp;resume&nbsp;and&nbsp;cover&nbsp;letter&nbsp;generation&nbsp;option.</span></dd></dl>
+</td></tr></table>
+</body></html>

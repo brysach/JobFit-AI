@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.storage.job_analysis_storage</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.storage.html" class="white">storage</a>.job_analysis_storage</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cstorage%5Cjob_analysis_storage.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\storage\job_analysis_storage.py</a></td></tr></table>
+    <p><span class="code">Storage&nbsp;layer&nbsp;for&nbsp;saved&nbsp;job&nbsp;analyses.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;engine&nbsp;-&gt;&nbsp;storage&nbsp;-&gt;&nbsp;Google&nbsp;Sheets<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;stores,&nbsp;retrieves,&nbsp;lists,&nbsp;and&nbsp;deletes&nbsp;job&nbsp;analysis&nbsp;records<br>
+in&nbsp;the&nbsp;jobsAnalysis&nbsp;worksheet.&nbsp;It&nbsp;is&nbsp;responsible&nbsp;for&nbsp;assigning&nbsp;new<br>
+application&nbsp;IDs&nbsp;and&nbsp;converting&nbsp;saved&nbsp;Google&nbsp;Sheets&nbsp;rows&nbsp;into&nbsp;structured<br>
+Python&nbsp;dictionaries.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;should&nbsp;not&nbsp;collect&nbsp;terminal&nbsp;input,&nbsp;call&nbsp;Gemini,&nbsp;or&nbsp;format<br>
+user-facing&nbsp;output.</span></p>
+<p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-delete_job_analysis_by_row"><strong>delete_job_analysis_by_row</strong></a>(row_number: int) -&gt; dict</dt><dd><span class="code">Delete&nbsp;a&nbsp;job&nbsp;analysis&nbsp;by&nbsp;its&nbsp;Google&nbsp;Sheets&nbsp;row&nbsp;number.</span></dd></dl>
+ <dl><dt><a name="-get_job_analysis"><strong>get_job_analysis</strong></a>(application_id: int | str) -&gt; dict</dt><dd><span class="code">Retrieve&nbsp;a&nbsp;saved&nbsp;job&nbsp;analysis&nbsp;by&nbsp;application_id.</span></dd></dl>
+ <dl><dt><a name="-list_job_analyses"><strong>list_job_analyses</strong></a>() -&gt; dict</dt><dd><span class="code">Return&nbsp;all&nbsp;saved&nbsp;job&nbsp;analyses&nbsp;with&nbsp;their&nbsp;sheet&nbsp;row&nbsp;numbers.</span></dd></dl>
+ <dl><dt><a name="-save_job_analysis"><strong>save_job_analysis</strong></a>(job_analysis: dict) -&gt; dict</dt><dd><span class="code">Save&nbsp;analyzed&nbsp;job&nbsp;description&nbsp;data.</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>REQUIRED_JOB_ANALYSIS_KEYS</strong> = {'company_name', 'job_title', 'keywords', 'required_skills'}</td></tr></table>
+</body></html>

@@ -1,5 +1,19 @@
 # src/interface/cli.py
 
+"""Main command-line interface for JobFit-AI.
+
+Architecture position:
+    user -> interface -> engine -> storage
+
+This module displays the main menu, reads the user's menu choice, and
+calls the correct interface flow. It does not call Gemini or Google
+Sheets directly. Each feature flow handles its own input prompts and
+returns a response dictionary.
+
+The interface layer is responsible for terminal input, terminal output,
+and user-facing formatting.
+"""
+
 from __future__ import annotations
 
 from src.interface.job_analysis_cli import run_job_analysis_flow

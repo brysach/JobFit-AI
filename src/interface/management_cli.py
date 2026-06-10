@@ -1,5 +1,18 @@
 # src/interface/management_cli.py
 
+"""Command-line flows for managing saved records.
+
+Architecture position:
+    interface -> engine -> storage
+
+This module displays saved user profiles and saved job analyses,
+shows full details for selected records, asks for deletion confirmation,
+and sends delete requests to the engine layer.
+
+The interface uses displayed list numbers instead of exposing backend
+row numbers directly to the user.
+"""
+
 from __future__ import annotations
 
 from src.engine.job_analysis import delete_job_analysis_by_index

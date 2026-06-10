@@ -1,5 +1,18 @@
 # src/interface/user_profile_cli.py
 
+"""Command-line flow for collecting and saving user profiles.
+
+Architecture position:
+    interface -> engine -> storage
+
+This module asks the user for profile information such as name, email,
+phone number, university, degree, skills, projects, and experience.
+It sends the structured profile data to the engine layer and displays
+the resulting success, cancellation, or error message.
+
+This module only handles terminal input and output.
+"""
+
 from __future__ import annotations
 
 from src.engine.user_profile import save_user_profile

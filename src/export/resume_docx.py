@@ -1,4 +1,17 @@
 # src/export/resume_docx.py
+"""DOCX export layer for generated application materials.
+
+Architecture position:
+    interface -> export
+
+This module converts generated application materials into a formatted
+.docx file. The exported document includes a resume page, a cover letter
+page, and a strengths and weaknesses page.
+
+The resume page uses the user's profile information for the header and
+education section, and uses generated materials for the tailored skills,
+projects, and experience sections.
+"""
 
 from __future__ import annotations
 

@@ -1,5 +1,19 @@
 # src/storage/job_analysis_storage.py
 
+"""Storage layer for saved job analyses.
+
+Architecture position:
+    engine -> storage -> Google Sheets
+
+This module stores, retrieves, lists, and deletes job analysis records
+in the jobsAnalysis worksheet. It is responsible for assigning new
+application IDs and converting saved Google Sheets rows into structured
+Python dictionaries.
+
+This module should not collect terminal input, call Gemini, or format
+user-facing output.
+"""
+
 from __future__ import annotations
 
 from src.storage.google_sheets import get_worksheet

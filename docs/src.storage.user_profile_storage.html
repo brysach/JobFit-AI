@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module src.storage.user_profile_storage</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="src.html" class="white">src</a>.<a href="src.storage.html" class="white">storage</a>.user_profile_storage</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:c%3A%5Cusers%5Cbrysa%5Conedrive%5Cdocuments%5Cucr-class-files%5Cspring2026%5Ccs180%5Cproject%5Cjobfit-ai%5Csrc%5Cstorage%5Cuser_profile_storage.py">c:\users\brysa\onedrive\documents\ucr-class-files\spring2026\cs180\project\jobfit-ai\src\storage\user_profile_storage.py</a></td></tr></table>
+    <p><span class="code">Storage&nbsp;layer&nbsp;for&nbsp;saved&nbsp;user&nbsp;profiles.<br>
+&nbsp;<br>
+Architecture&nbsp;position:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;engine&nbsp;-&gt;&nbsp;storage&nbsp;-&gt;&nbsp;Google&nbsp;Sheets<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;stores,&nbsp;retrieves,&nbsp;lists,&nbsp;and&nbsp;deletes&nbsp;user&nbsp;profile&nbsp;records<br>
+in&nbsp;the&nbsp;usersProfile&nbsp;worksheet.&nbsp;It&nbsp;is&nbsp;responsible&nbsp;for&nbsp;assigning&nbsp;new<br>
+user&nbsp;IDs&nbsp;and&nbsp;converting&nbsp;list&nbsp;fields&nbsp;such&nbsp;as&nbsp;skills,&nbsp;projects,&nbsp;and<br>
+experience&nbsp;between&nbsp;JSON&nbsp;strings&nbsp;and&nbsp;Python&nbsp;lists.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;should&nbsp;only&nbsp;handle&nbsp;persistence&nbsp;behavior.</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="json.html">json</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-delete_user_profile_by_row"><strong>delete_user_profile_by_row</strong></a>(row_number: int) -&gt; dict</dt><dd><span class="code">Delete&nbsp;one&nbsp;user&nbsp;profile&nbsp;by&nbsp;Google&nbsp;Sheet&nbsp;row&nbsp;number.</span></dd></dl>
+ <dl><dt><a name="-get_user_profile"><strong>get_user_profile</strong></a>(user_id: int | str) -&gt; dict</dt><dd><span class="code">Retrieve&nbsp;one&nbsp;user&nbsp;profile&nbsp;by&nbsp;backend&nbsp;user_id.</span></dd></dl>
+ <dl><dt><a name="-list_user_profiles"><strong>list_user_profiles</strong></a>() -&gt; dict</dt><dd><span class="code">Return&nbsp;all&nbsp;saved&nbsp;user&nbsp;profiles.</span></dd></dl>
+ <dl><dt><a name="-save_user_profile"><strong>save_user_profile</strong></a>(user_profile: dict) -&gt; dict</dt><dd><span class="code">Save&nbsp;a&nbsp;user&nbsp;profile&nbsp;to&nbsp;Google&nbsp;Sheets.</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>REQUIRED_USER_PROFILE_KEYS</strong> = {'degree', 'email', 'experience', 'name', 'phone_number', 'projects', ...}</td></tr></table>
+</body></html>

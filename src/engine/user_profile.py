@@ -1,5 +1,20 @@
 # src/engine/user_profile.py
 
+"""Engine layer for user profile management.
+
+Architecture position:
+    interface -> engine -> storage
+
+This module validates user profile data before it reaches the storage
+layer. It supports saving, retrieving, listing, and deleting user
+profiles. User profiles contain contact information, education details,
+skills, projects, and experience used later for application material
+generation.
+
+This module does not collect terminal input and does not directly write
+to Google Sheets. It delegates persistence work to the storage layer.
+"""
+
 from __future__ import annotations
 
 from src.storage.user_profile_storage import delete_user_profile_by_row
