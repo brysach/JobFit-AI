@@ -17,72 +17,105 @@ and user-facing formatting.
 from __future__ import annotations
 
 from src.interface.job_analysis_cli import run_job_analysis_flow
+from src.interface.materials_cli import run_resume_generation_flow
 from src.interface.management_cli import run_manage_jobs_flow
 from src.interface.management_cli import run_manage_users_flow
-from src.interface.materials_cli import run_resume_generation_flow
 from src.interface.user_profile_cli import run_user_profile_flow
 
 
-def print_main_menu() -> None:
-    """Display the main menu."""
+def print_menu() -> None:
+    """Print the main JobFit-AI menu.
+
+    Parameters:
+        None.
+
+    Returns:
+        None.
+    """
 
     print()
-    print("JobFit-AI Main Menu")
-    print("===================")
+    print("========================================")
+    print("              JobFit-AI")
+    print("========================================")
     print("1. Add user information")
     print("2. Analyze job description")
     print("3. Generate resume")
     print("4. Manage users")
     print("5. Manage jobs")
     print("6. Exit")
+    print()
 
 
 def handle_menu_choice(choice: str) -> bool:
-    """Handle one menu choice.
+    """Handle one main menu choice.
 
-    Return True to keep running.
-    Return False to exit.
+    Parameters:
+        choice (str): User's menu choice.
+
+    Returns:
+        bool: True if the program should continue running.
+        bool: False if the program should exit.
     """
 
-    if choice == "1":
+    normalized_choice = choice.strip()
+
+    if normalized_choice == "1":
         run_user_profile_flow()
         return True
 
-    if choice == "2":
+    if normalized_choice == "2":
         run_job_analysis_flow()
         return True
 
-    if choice == "3":
+    if normalized_choice == "3":
         run_resume_generation_flow()
         return True
 
-    if choice == "4":
+    if normalized_choice == "4":
         run_manage_users_flow()
         return True
 
-    if choice == "5":
+    if normalized_choice == "5":
         run_manage_jobs_flow()
         return True
 
-    if choice == "6":
+    if normalized_choice == "6":
         print("Goodbye.")
         return False
 
-    print("Invalid option. Please choose 1, 2, 3, 4, 5, or 6.")
+    print("Invalid option. Please choose a number from 1 to 6.")
     return True
 
 
+def run_session() -> None:
+    """Run the main command-line session loop.
+
+    Parameters:
+        None.
+
+    Returns:
+        None.
+    """
+
+    keep_running = True
+
+    while keep_running:
+        print_menu()
+        choice = input("Choose an option: ")
+        keep_running = handle_menu_choice(choice)
+
+
 def main() -> None:
-    """Run the command-line interface."""
+    """Start the JobFit-AI command-line program.
 
-    while True:
-        print_main_menu()
-        choice = input("Choose an option: ").strip()
+    Parameters:
+        None.
 
-        should_continue = handle_menu_choice(choice)
+    Returns:
+        None.
+    """
 
-        if not should_continue:
-            break
+    run_session()
 
 
 if __name__ == "__main__":
