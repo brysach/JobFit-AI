@@ -62,7 +62,7 @@ application_id | user_id | resume_skills | resume_projects | resume_experience |
 
 ### Service Account Setup
 
-Place your Google Cloud service account credentials file in the project root:
+Place your Google Cloud service account credentials file in the project root (see `service_account.example.json` for reference):
 
 ```text
 service_account.json
